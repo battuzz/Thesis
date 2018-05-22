@@ -1,0 +1,236 @@
+@article{asdf,
+  author    = {Volodymyr Mnih and
+               Koray Kavukcuoglu and
+               David Silver and
+               Alex Graves and
+               Ioannis Antonoglou and
+               Daan Wierstra and
+               Martin A. Riedmiller},
+  title     = {Playing Atari with Deep Reinforcement Learning},
+  journal   = {CoRR},
+  volume    = {abs/1312.5602},
+  year      = {2013},
+  url       = {http://arxiv.org/abs/1312.5602},
+  archivePrefix = {arXiv},
+  eprint    = {1312.5602},
+  timestamp = {Wed, 07 Jun 2017 14:43:06 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/MnihKSGAWR13},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@inproceedings{Williams92simplestatistical,
+    author = {Ronald J. Williams},
+    title = {Simple statistical gradient-following algorithms for connectionist reinforcement learning},
+    booktitle = {Machine Learning},
+    year = {1992},
+    pages = {229--256}
+}
+@inproceedings{Sutton:1999:PGM:3009657.3009806,
+ author = {Sutton, Richard S. and McAllester, David and Singh, Satinder and Mansour, Yishay},
+ title = {Policy Gradient Methods for Reinforcement Learning with Function Approximation},
+ booktitle = {Proceedings of the 12th International Conference on Neural Information Processing Systems},
+ series = {NIPS'99},
+ year = {1999},
+ location = {Denver, CO},
+ pages = {1057--1063},
+ numpages = {7},
+ url = {http://dl.acm.org/citation.cfm?id=3009657.3009806},
+ acmid = {3009806},
+ publisher = {MIT Press},
+ address = {Cambridge, MA, USA}
+} 
+
+@InProceedings{natural,
+  author =       "Kakade, Sham",
+  title =        "A Natural Policy Gradient",
+  booktitle =    "Advances in Neural Information Processing Systems 14 (NIPS 2001)",
+  editor =    "Dietterich, Thomas G. and Becker, Suzanna and Ghahramani, Zoubin",
+  year =         "2001",
+  publisher = "MIT Press",
+  pages =     "1531-1538",
+  url = "http://books.nips.cc/papers/files/nips14/CN11.pdf",
+  bib2html_rescat = "Learning Methods, MDP"
+}
+
+@article{peters,
+  title = {Reinforcement Learning of Motor Skills with Policy Gradients},
+  author = {Peters, J. and Schaal, S.},
+  journal = {Neural Networks},
+  volume = {21},
+  number = {4},
+  pages = {682-697},
+  organization = {Max-Planck-Gesellschaft},
+  school = {Biologische Kybernetik},
+  month = may,
+  year = {2008},
+  month_numeric = {5}
+}
+@incollection{adaptive_step,
+title = {Adaptive Step-Size for Policy Gradient Methods},
+author = {Pirotta, Matteo and Restelli, Marcello and Bascetta, Luca},
+booktitle = {Advances in Neural Information Processing Systems 26},
+editor = {C. J. C. Burges and L. Bottou and M. Welling and Z. Ghahramani and K. Q. Weinberger},
+pages = {1394--1402},
+year = {2013},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/5186-adaptive-step-size-for-policy-gradient-methods.pdf}
+}
+@incollection{adaptive_batch,
+title = {Adaptive Batch Size for Safe Policy Gradients},
+author = {Papini, Matteo and Pirotta, Matteo and Restelli, Marcello},
+booktitle = {Advances in Neural Information Processing Systems 30},
+editor = {I. Guyon and U. V. Luxburg and S. Bengio and H. Wallach and R. Fergus and S. Vishwanathan and R. Garnett},
+pages = {3591--3600},
+year = {2017},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/6950-adaptive-batch-size-for-safe-policy-gradients.pdf}
+}
+
+@InProceedings{safe_iteration,
+  title = 	 {Safe Policy Iteration},
+  author = 	 {Matteo Pirotta and Marcello Restelli and Alessio Pecorino and Daniele Calandriello},
+  booktitle = 	 {Proceedings of the 30th International Conference on Machine Learning},
+  pages = 	 {307--315},
+  year = 	 {2013},
+  editor = 	 {Sanjoy Dasgupta and David McAllester},
+  volume = 	 {28},
+  number =       {3},
+  series = 	 {Proceedings of Machine Learning Research},
+  address = 	 {Atlanta, Georgia, USA},
+  month = 	 {17--19 Jun},
+  publisher = 	 {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v28/pirotta13.pdf},
+  url = 	 {http://proceedings.mlr.press/v28/pirotta13.html},
+  abstract = 	 {This paper presents a study of the policy improvement step that can be usefully exploited by approximate policy-iteration algorithms.  When either the policy evaluation step or the policy improvement step returns an approximated result, the sequence of policies produced by policy iteration may not be monotonically increasing, and oscillations may occur.  To address this issue, we consider safe policy improvements, i.e., at each iteration we search for a policy that maximizes a lower bound to the policy improvement w.r.t. the current policy. When no improving policy can be found the algorithm stops.  We propose two safe policy-iteration algorithms that differ in the way the next policy is chosen w.r.t. the estimated greedy policy.  Besides being theoretically derived and discussed, the proposed algorithms are empirically evaluated and compared with state-of-the-art approaches on some chain-walk domains and on the Blackjack card game.}
+}
+
+@ARTICLE{trpo,
+   author = {{Schulman}, J. and {Levine}, S. and {Moritz}, P. and {Jordan}, M.~I. and 
+	{Abbeel}, P.},
+    title = "{Trust Region Policy Optimization}",
+  journal = {ArXiv e-prints},
+archivePrefix = "arXiv",
+   eprint = {1502.05477},
+ primaryClass = "cs.LG",
+ keywords = {Computer Science - Learning},
+     year = 2015,
+    month = feb,
+   adsurl = {http://adsabs.harvard.edu/abs/2015arXiv150205477S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{2017arXiv170804133I,
+   author = {{Islam}, R. and {Henderson}, P. and {Gomrokchi}, M. and {Precup}, D.
+	},
+    title = "{Reproducibility of Benchmarked Deep Reinforcement Learning Tasks for Continuous Control}",
+  journal = {ArXiv e-prints},
+archivePrefix = "arXiv",
+   eprint = {1708.04133},
+ primaryClass = "cs.LG",
+ keywords = {Computer Science - Learning},
+     year = 2017,
+    month = aug,
+   adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170804133I},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{2015arXiv150902971L,
+   author = {{Lillicrap}, T.~P. and {Hunt}, J.~J. and {Pritzel}, A. and {Heess}, N. and 
+	{Erez}, T. and {Tassa}, Y. and {Silver}, D. and {Wierstra}, D.
+	},
+    title = "{Continuous control with deep reinforcement learning}",
+  journal = {ArXiv e-prints},
+archivePrefix = "arXiv",
+   eprint = {1509.02971},
+ primaryClass = "cs.LG",
+ keywords = {Computer Science - Learning, Statistics - Machine Learning},
+     year = 2015,
+    month = sep,
+   adsurl = {http://adsabs.harvard.edu/abs/2015arXiv150902971L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{DBLP:journals/corr/abs-1709-06560,
+  author    = {Peter Henderson and
+               Riashat Islam and
+               Philip Bachman and
+               Joelle Pineau and
+               Doina Precup and
+               David Meger},
+  title     = {Deep Reinforcement Learning that Matters},
+  journal   = {CoRR},
+  volume    = {abs/1709.06560},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1709.06560},
+  archivePrefix = {arXiv},
+  eprint    = {1709.06560},
+  timestamp = {Tue, 17 Oct 2017 12:29:59 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1709-06560},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/abs-1802-04412,
+  author    = {Kamyar Azizzadenesheli and
+               Emma Brunskill and
+               Animashree Anandkumar},
+  title     = {Efficient Exploration through Bayesian Deep Q-Networks},
+  journal   = {CoRR},
+  volume    = {abs/1802.04412},
+  year      = {2018},
+  url       = {http://arxiv.org/abs/1802.04412},
+  archivePrefix = {arXiv},
+  eprint    = {1802.04412},
+  timestamp = {Thu, 01 Mar 2018 15:00:45 +0100},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1802-04412},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{Dearden:1998:BQ:295240.295801,
+ author = {Dearden, Richard and Friedman, Nir and Russell, Stuart},
+ title = {Bayesian Q-learning},
+ booktitle = {Proceedings of the Fifteenth National/Tenth Conference on Artificial Intelligence/Innovative Applications of Artificial Intelligence},
+ series = {AAAI '98/IAAI '98},
+ year = {1998},
+ isbn = {0-262-51098-7},
+ location = {Madison, Wisconsin, USA},
+ pages = {761--768},
+ numpages = {8},
+ url = {http://dl.acm.org/citation.cfm?id=295240.295801},
+ acmid = {295801},
+ publisher = {American Association for Artificial Intelligence},
+ address = {Menlo Park, CA, USA}
+}
+
+
+@article{DBLP:journals/corr/abs-1712-03632,
+  author    = {Anay Pattanaik and
+               Zhenyi Tang and
+               Shuijing Liu and
+               Gautham Bommannan and
+               Girish Chowdhary},
+  title     = {Robust Deep Reinforcement Learning with Adversarial Attacks},
+  journal   = {CoRR},
+  volume    = {abs/1712.03632},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1712.03632},
+  archivePrefix = {arXiv},
+  eprint    = {1712.03632},
+  timestamp = {Wed, 03 Jan 2018 12:33:17 +0100},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1712-03632},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@article{DBLP:journals/corr/PintoDSG17,
+  author    = {Lerrel Pinto and
+               James Davidson and
+               Rahul Sukthankar and
+               Abhinav Gupta},
+  title     = {Robust Adversarial Reinforcement Learning},
+  journal   = {CoRR},
+  volume    = {abs/1703.02702},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1703.02702},
+  archivePrefix = {arXiv},
+  eprint    = {1703.02702},
+  timestamp = {Wed, 07 Jun 2017 14:41:36 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/PintoDSG17},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+} 
