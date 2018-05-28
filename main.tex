@@ -8,10 +8,13 @@
 \usepackage{rotating}  
 \usepackage{fancyhdr}  
 \usepackage[scriptsize]{caption} 
-\hyphenation{a-gen-tiz-za-zio-ne}
 \usepackage{cite}
 \usepackage{hyperref}
 
+
+% ===================================================
+% PAGE LAYOUT
+% ===================================================
 \usepackage{geometry}    % Da rivedere
 \geometry{
   inner=37.125mm,
@@ -23,11 +26,9 @@
   marginparsep=17pt,
   headsep=24pt,
 }
+\setlength\parindent{1cm}
 
-%\setlength{\oddsidemargin} {2. cm}
-%\setlength{\evensidemargin} {2. cm}
-%\addtolength{\oddsidemargin} {-0.4 cm}
-%\addtolength{\evensidemargin} {-0.4 cm}
+
 \linespread{1.1}
 
 \usepackage[english]{babel}
@@ -36,60 +37,75 @@
 
 \pagestyle{empty}
 
-\begin{document}
-\include{title}
-\thispagestyle{empty} \normalfont \cleardoublepage
-\include{commitment}
-\thispagestyle{empty}  \cleardoublepage
-\pagenumbering{roman}
-\include{summary}
-\thispagestyle{empty} \vspace*{.75truecm} \cleardoublepage
-\include{italian}
-\thispagestyle{empty} \vspace*{.75truecm} \cleardoublepage
-\include{acknowledgments}
-\thispagestyle{empty} \vspace*{.75truecm} \normalfont \cleardoublepage
-\pagestyle{plain}\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}} 
+
+% ===================================================
+% MACROS
+% ===================================================
+\newcommand{\smartdoubleflush}{\pagestyle{empty} \cleardoublepage \pagestyle{fancy}}
+
+\newcommand{\vtheta}{{\boldsymbol{\theta}}}
+
+% ===================================================
+% HEADERS AND FOOTERS
+% ===================================================
+
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}} 
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}         
 \fancyhead[LE,RO]{\bfseries\thepage}    
                                         
 \fancyhead[RE]{\bfseries\leftmark}    
 \fancyhead[LO]{\bfseries\rightmark}     
-\renewcommand{\headrulewidth}{0.3pt} 
+\renewcommand{\headrulewidth}{0.3pt}
+
+\fancyfoot{} 
+
+% ===================================================
+% BEGIN DOCUMENT
+% ===================================================
+
+\begin{document}
+
+\pagenumbering{roman}
+\pagestyle{fancy}
+
+\include{title}
+\smartdoubleflush
+\include{commitment}
+\smartdoubleflush
+
+\include{summary}
+\smartdoubleflush
+
+\include{italian}
+\smartdoubleflush
+\include{acknowledgments}
+\smartdoubleflush
+
+ 
 
 
-\tableofcontents
-\pagenumbering{gobble}
+\tableofcontents \thispagestyle{empty}
+\smartdoubleflush
 
 
+\include{chapter1} \smartdoubleflush
+\include{chapter2} \smartdoubleflush
+\include{chapter3} \smartdoubleflush
+\include{chapter4} \smartdoubleflush
+\include{chapter5} \smartdoubleflush
 
-\include{chapter1}
-\include{chapter2}
-\include{chapter3}
-\include{chapter4}
-\include{chapter5}
-
-
-\cleardoublepage
+\phantomsection
 % ---- Bibliography ----
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliographystyle{unsrt}
 \bibliography{biblio}
+\smartdoubleflush
 %\nocite{*}
 
 \appendix
 
-\pagestyle{fancy} 
-\fancyfoot{}                                               
-\renewcommand{\chaptermark}[1]{\markboth{\appendixname\ \thechapter.\ #1}{}} 
-\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}         
-\fancyhead[LE,RO]{\bfseries\thepage}    
-                                        
-\fancyhead[RE]{\bfseries\leftmark}    
-\fancyhead[LO]{\bfseries\rightmark}     
-\renewcommand{\headrulewidth}{0.3pt} 
-
-\include{appendixA}
-\include{appendixB}
+\include{appendixA} \smartdoubleflush
+\include{appendixB} \smartdoubleflush
 
 
 \end{document}
