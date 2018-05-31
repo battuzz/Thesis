@@ -15,3 +15,71 @@ Altrimenti ci arrabbiamo
 \vspace{0.5cm}
 
 \noindent In questa sezione si deve descrivere l'obiettivo della ricerca, le problematiche affrontate ed eventuali definizioni preliminari nel caso la tesi sia di carattere teorico.
+
+
+\begin{definition}[Safe policy]
+Given a (user specified) lower-bound, $J_{-}$, on the performance and a confidence level, $\delta$, we call an RL algorithm safe if it ensures that the probability that a policy with performance less than $J_{-}$ will be proposed is at most $\delta$.
+ 
+\end{definition}
+
+\section{Kakade}
+
+Kakade 2002 first considered Monotonic Improvement in policy iteration. Considering a policy update that is a convex combination between the current policy $\pi$ and the greedy policy $\overline{\pi}$:
+\begin{equation}
+\pi' = (1-\alpha )\pi + \alpha\overline{\pi} \label{eq:kakade-update}
+\end{equation}
+With $\alpha = 1$ we have the 'normal' policy iteration. But this is not guaranteed to be safe, so we choose $\alpha < 1$ to make smaller updates and to guarantee an improvement.
+
+\begin{theorem}[Kakade 2002]
+Using update rule \ref{eq:kakade-update}, the performance improvement is guaranteed as follows:
+\begin{equation}
+J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{\alpha}{1 - \gamma}\left( \poladv[\pi, \mu](\overline{\pi}) - \frac{2\alpha \gamma \epsilon}{1 - \gamma (1 - \alpha)} \right) \label{eq:kakade-improvement}
+\end{equation}
+Where:
+\begin{equation}
+\poladv[\pi, \mu](\overline{\pi}) = \EV[s\sim d_{\pi, \mu}]{ \EV[a\sim\overline{\pi}]{A_{\pi}(s,a)}}
+\end{equation}
+is the policy advantage function and
+\begin{equation}
+\epsilon = \max_s \left| \EV[a\sim\overline{\pi}]{A_{\pi}(s,a)} \right|
+\end{equation}
+\end{theorem}
+
+\begin{theorem}
+Let $R$ be the maximal possible reward. Using update rule \ref{eq:kakade-update}, if $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ the performance bound \ref{eq:kakade-improvement} is maximized by choosing:
+\begin{equation}
+\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu](\overline{\pi})}{4R}
+\end{equation}
+thus guaranteeing a policy improvement of:
+\begin{equation}
+J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{{\poladv[\pi, \mu](\overline{\pi})}^2}{8R}
+\end{equation}
+\end{theorem}
+
+The algorithm that follows these rules is called CPI (Conservative Policy Iteration).
+
+A notable result from Kakade 2002 is this one: 
+\begin{theorem}[Lemma 6.1 from Kakade 2002]
+For any policies $\tilde{\pi}$ and $\pi$ and any starting state distribution $\mu$,
+\begin{equation}
+J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}d_{\tilde{\pi}, \mu}]{A_{\pi}(s,a)} \label{eq:kakade-lemma6.1}
+\end{equation} 
+\end{theorem}
+
+\section{Safe policy iteration}
+First off, they developed some bounds on the future state distribution $d_{\mu}^{\pi}$:
+\begin{theorem}
+Let $\pi$ and $\pi'$ be two stationary policies for an infinite horizon MDP M with state transition $\tfunc$. The $L_1$-norm of the difference between their $\gamma$-discounted future state distributions under starting state distribution $\mu$ can be upper bounded as follows:
+\begin{equation}
+\norm{d_{\mu}^{\pi'}(s) - d_{\mu}^{\pi}(s)} \leq \frac{\gamma}{1-\gamma}\norm[\infty]{\sum_{a\in\aspace}\left(\pi'(a\mid s) - \pi(a\mid s)\right)\tfunc(s,a)}\norm[\infty]{1-\gamma P}
+\end{equation}
+\end{theorem}
+
+
+\begin{theorem}
+Let $\pi$ and $\pi'$ be two stationary policies for an infinite horizon MDP M. The $L_1$-norm of the difference between their $\gamma$-discounted future state distributions under starting state distribution $\mu$ can be upper bounded as follows:
+\begin{equation}
+\norm{d_{\mu}^{\pi'} - d_{\mu}^{\pi}} \leq \frac{\gamma}{(1-\gamma)^2}\sup_{s\in\sspace}\norm{\pi'(\cdot\mid s) - \pi(\cdot \mid s)}
+\end{equation}
+\end{theorem}
+

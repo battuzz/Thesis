@@ -15,4 +15,196 @@ I due superpiedi quasi piatti
 \end{quotation}
 \vspace{0.5cm}
 
-\noindent Nella seconda sezione si riporta lo stato dell'arte del settore, un inquadramento dell'area di ricerca orientato a portare il lettore all'interno della problematica affrontata. Bisogna dimostrare di conoscere le cose fatte fino ad ora in questo campo e il perch\'e si sia reso necessario lo svolgimento di questo lavoro. Questa sezione deve essere grondante di citazioni bibliografiche~\cite{marco02bud}.
+
+Reinforcement Learning (RL) is a field of Machine Learning that closely resembles how living beings learn in nature. The aim of RL is to learn complex interactions between an agent and an environment. This require some mathematical model upon which we can develop new learning algorithms.
+
+\section{Markov Decision Processes}
+\definition{A Markov Decision Process (MDP) is a tuple $\left\langle \sspace, \aspace, \tfunc, \rfunc, \gamma, \mu \right\rangle$  where:
+\begin{itemize}
+\item $\sspace$ is the set of possible \textbf{states}
+\item $\aspace$ is the set of possible \textbf{actions}
+\item $\tfunc : \sspace \times \aspace \rightarrow \Delta (\sspace)$ is the \textbf{transition function} that, given the current state and current action, outputs a probability distribution over the next state.
+\item $\rfunc : \sspace \times \aspace \rightarrow \mathbb{R}$ is the \textbf{reward function} that maps a scalar reward to every state-action pair
+\item $\gamma$ is the \textbf{discount factor}
+\item $\mu : \Delta ( \sspace )$ is a probability distribution over the \textbf{initial state}. 
+\end{itemize}
+}
+
+This mathematical model is very general and can be used to model different problems:
+
+\begin{example}[Chess]
+The game of chess can be modelled as an MDP with discrete state and action space, deterministic transition function that follows the rule of the game and a possible reward function:
+\begin{equation*}
+\rfunc(s,a) = \begin{cases}1 & \textrm{Player wins} \\ -1 & \textrm{Player does not win} \end{cases}
+\end{equation*}
+\end{example}
+
+\begin{example}[Mountain Car]
+A car is placed between two hills and can move left or right. The goal is to reach the top of the right hill, but the engine is not powerful enough to directly climb the hill, so the optimal solution is to gain velocity by first going in the opposite direction. This task can be modelled with a continuous state space $\sspace \in [-2, 2]$, continuous action representing the force applied to the car $\aspace \in [-1, 1]$, deterministic transition function given by physics laws and reward:
+\begin{equation*}
+\rfunc(s,a) = \begin{cases} +100 & \textrm{when } s \geq 1.5 \\ -a^2 & \textrm{otherwise} \end{cases}
+\end{equation*}
+\end{example}
+
+
+\begin{example}[Cartpole]
+
+\end{example}
+
+
+An agent in a MDP starts from an initial state $s_0 \sim \mu$. From this state, the agent can apply an action $a_0 \in \aspace$. The environment receives the action $a_0$ and returns to the agent the next state $s_1 \sim \tfunc(s_0, a_0)$ and reward $r_1 = \rfunc(s_0, a_0)$. The interaction continues until the agent reaches the goal.
+
+The sequence of states, actions and rewards $\tau \sim s_0, a_0, s_1, r_1, a_1, s_2, \ldots$ is called trajectory.
+
+Intuitively, the agent aims at maximizing the sum of the collected rewards. However this naive approach can lead to some problems since we can potentially have trajectories of unlimited length (e.g. the agent is stuck in a loop) and consequently the cumulative reward can grow indefinitely.
+For this reason, it is common to consider the discounted cumulative reward instead:
+\begin{equation*}
+R = \sum_{t=0}^{\infty} \gamma^t r_t
+\end{equation*}
+where $\gamma$ is a discount factor that overcomes the above problem by reducing the value of future rewards. The meaning of $\gamma$ is two-fold: at a first glance, it represents how the agent is interested in future rewards. With $\gamma$ close to $0$, we have a myopic behaviour, where we are only interested in immediate rewards rather than long-term investments. With $\gamma$ close to $1$, instead, we are giving more value to long-term rewards. In the second place, $\gamma$ can also represent the probability that the simulation will continue for one more step. If $\gamma$ is low, we should strive to get as much as we can because we don't have any assurance that we could last one more step.
+The discount factor usually depends on the domain. 
+
+
+The discounted cumulative reward depends on the initial state and on the actions chosen along the way. The function that selects the proper action given the state is called policy.
+
+\begin{definition}
+A policy $\pi: \sspace \rightarrow \Delta (\aspace)$ is a function that for each state $s \in \sspace$ outputs a probability distribution over the actions in $\aspace$. In other words, from state $s$ the agent will choose action $a$ with probability $\pi(a \mid s)$.
+\end{definition}
+
+Given this definition, we can formalize the problem in this way:
+
+\textbf{Problem formulation:}\quad
+To solve a MDP means to find an optimal policy $\pi^*$ that maximizes the average cumulative reward. More formally we want to find $\pi^*$ such that $\EV[a_k \sim \pi^*, s_0 \sim \mu]{R}$ is maximum.
+
+
+The quantity $J = \EV[\pi, \mu]{R}$ is usually referred to as performance or expected return. This quantity can be expressed in a close form by defining the discounted future state distribution:
+
+\begin{definition}[Future state distribution]
+The (discounted) future state distribution is defined as: 
+\[
+d_{\mu}^{\pi}(s) = (1-\gamma)\sum_{t=0}^{\infty} \gamma^t Pr(s_t = s)
+\]. 
+This quantity identifies the expected state distribution starting from $s_0 \sim \mu$ and following policy $\pi$. 
+\end{definition}
+
+\begin{definition}[Performance]
+The performance of a policy $\pi$ given an initial state distribution $\mu$ can be expressed as: 
+\begin{equation*}
+J_{\mu}^{\pi} = \int_{\sspace} d_{\mu}^{\pi}(s) \int_{\aspace} \pi(a \mid s) R(s,a) \de a \de s
+\end{equation*}
+\end{definition}
+
+
+\subsection{Optimal value function}
+In this part we will give a brief introduction to a complementary way to define the problem of solving a MDP. We start by defining the value function for a state $s$:
+
+\begin{definition}[State-value function]
+The value of a state $s$ that can be obtained by running policy $\pi$ is given by:
+\[
+V^{\pi}(s) = \int_{\aspace} \pi(a \mid s) \left( \rfunc(s,a) + \gamma \int_{\sspace} \tfunc(s' \mid s, a) V^{\pi} (s') \de s' \right) \de a
+\]
+\end{definition}
+
+Intuitively, the state-value function gives the expected return that can be obtained by running a policy $\pi$ from state $s$. If the evaluating policy corresponds to the optimal policy $\pi^*$ we will obtain the optimal value function, usually defined as $V^*(s)$. 
+
+The value function can be used to define an ordering between policies:
+\begin{definition}[Policy improvement]
+Given two policies $\pi, \pi' \in \Pi$, policy $\pi'$ is better than or equal to ($\succcurlyeq$) $\pi$ when the value function of $\pi'$ is greater than or equal to the value function of $\pi$ in all states:
+\[
+\pi' \succcurlyeq \pi \Longleftrightarrow V^{\pi'}(s) \geq V^{\pi}(s),\quad \forall s \in \sspace
+\]
+\end{definition}
+
+Clearly, the optimal policy will be the maximal of the ordering relation, as demonstrated by the following theorem:
+
+\begin{theorem} 
+For any MDP the following statements hold:
+\begin{itemize}
+\item there exists an optimal policy $\pi^* \in \Pi$ such that $\pi^* \succcurlyeq  \pi$, $\forall \pi \in \Pi$.
+\item all optimal policies $\pi^*$ have the same optimal value function $V^{\pi^*}(s) = V^*(s) \forall s \in \sspace$ .
+\item there always exists an optimal policy $\pi*$ that is deterministic.
+\end{itemize}
+\end{theorem}
+
+This is an important result since we can develop an iterative algorithm that can automatically find the optimal policy. In fact, starting from any policy $\pi$, we can identify a policy $\pi' \succcurlyeq \pi$ that improves the current policy until we find the optimal policy $\pi*$. This method is called policy iteration, and it is proven to converge in a finite number of steps [TODO]. 
+
+The policy $\pi'$ is called the greedy policy, and it is the policy that maximizes the value action-value function for each state. 
+
+\begin{definition}[Action-value function]
+The action-value function is defined as follows:
+\[
+Q^{\pi}(s, a) = \rfunc(s, a) + \gamma \int_{\sspace} \tfunc (s' \mid s, a) \int_{\aspace} \pi(a' \mid s') Q^{\pi} (s', a') \de a' \de s'
+\]
+\end{definition}
+
+The action-value function defines the value that we can obtain starting from state $s$ and executing action $a$. Similarly to de definition of the optimal value function, the optimal action-value function is defined as the action-value function of the optimal policy $\pi^*$. 
+
+\begin{definition}[Advantage]
+The advantage function is defined as:
+\[
+\mathbb{A}^{\pi}(s,a) = Q^{\pi}(s,a) - V^{\pi}(s)
+\]
+\end{definition}
+
+The advantage function encodes the value gain that can be obtained by selecting action $a$ in state $s$ instead of following policy $\pi$. 
+
+
+Note that the greedy policy is the one that has always non-positive advantage for each state. 
+
+
+Bellman optimality operators
+
+Put algorithms and figures
+
+\section{General methods to solve a MDP}
+A MDP can be solved in various ways. We have seen in the previous section that a MDP is solved when we find an optimal policy $\pi^*$ that generates the optimal value function $V^*(s)$. However, a learning procedure can be classified in several classes:
+\begin{itemize}
+\item On-policy: the behaviour policy corresponds to the target policy. This means that every collected trajectory is sampled from the current policy.
+\item Off-policy: the target policy differs from the behaviour policy. This happens when we are trying to learn from samples that are drawn from a policy that is different from the current policy.
+\end{itemize}
+
+Another difference between the learning algorithms arises when we consider the amount of informations that we know during learning:
+\begin{itemize}
+\item Model-based RL algorithms have an exact information about the MDP. This means that the learning agent knows exactly the transition function $\tfunc$, and the reward function $\rfunc$. This is the easiest scenario because the MDP can be solved even without taking any sample from the actual system.
+\item Model-free RL algorithms, instead, have no information about the model, which is learned by collecting samples from the actual system.
+\end{itemize}
+
+From now on, we will focus only on model-free algorithms that learns on-policy. This is the typical setting for robotic control, since we don't have the possibility to explicitly model the environment and we can test our policy directly on the system.
+
+The next sections will describe the three main methods that are used to solve a MDP: policy iteration, value iteration and policy seach.
+
+\subsection{Policy iteration}
+Policy iteration algorithms aims at finding a sequence of policies $\pi^0, \pi^1, \ldots$ such that the sequence of the corresponding value functions $V^{\pi^0}, V^{\pi^1}, \ldots$ is non-decreasing. 
+This can be achieved by splitting each iteration in two phases:
+\begin{itemize}
+\item Policy evaluation: we evaluate the current policy $\pi^k$ on the MDP and we estimate the corresponding action-value function $Q^{\pi^k}$.
+\item Policy improvement: we improve the current policy $\pi^{k+1} \gets \pi^{k}$ based on the action-value function $Q^{\pi^k}$.
+\end{itemize}
+
+The policy improvement step selects the greedy policy:
+\begin{equation}
+\pi^{k+1}(s) \in \arg \max_{a \in \aspace} Q^{\pi^k}(s, a)  
+\end{equation}
+
+It is guaranteed that $V^{\pi^k+1} \geq V^{\pi^k}$ directly from the definition of greedy policy. Moreover, this algorithm is guaranteed to converge to the optimal policy $\pi^*$ when the state-action function $Q(s,a)$ can be computed exactly.
+
+The limitations of this approach are at least two:
+\begin{itemize}
+\item In practical scenarios it is not possible to exactly evaluate the action-value function due to the stochasticity of the environment and the sampling nature of the algorithm.
+\item This method can only be applied to discrete MDP, that is MDPs where both $\sspace$ and $\aspace$ are discrete sets. This is typically not the case for robotic control, where the state and action pair is typically continuous.
+\end{itemize}
+
+\subsection{Value iteration}
+Value iteration algorithms 
+
+\subsection{Policy search}
+
+\section{Policy gradient methods}
+\subsection{Gradient estimation}
+\subsection{Policy gradient theorem and G(PO)MDP}
+\subsection{Baselines}
+\subsection{Actor critic}
+
+
+
+ 

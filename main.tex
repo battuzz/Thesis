@@ -10,7 +10,8 @@
 \usepackage[scriptsize]{caption} 
 \usepackage{cite}
 \usepackage{hyperref}
-
+\usepackage{amsthm}
+\usepackage{xargs}
 
 % ===================================================
 % PAGE LAYOUT
@@ -26,16 +27,35 @@
   marginparsep=17pt,
   headsep=24pt,
 }
-\setlength\parindent{1cm}
+\setlength\parindent{0cm}
+\setlength\parskip{1em}
 
 
-\linespread{1.1}
+%\linespread{1.1}
 
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \renewcommand{\captionfont}{\normalfont \sffamily \itshape \small}
 
+
+
 \pagestyle{empty}
+
+% ===================================================
+% THEOREMS
+% ===================================================
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem*{definition}{Definition}
+\newtheorem{example}{Example}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newtheorem*{note}{Note}
 
 
 % ===================================================
@@ -43,7 +63,18 @@
 % ===================================================
 \newcommand{\smartdoubleflush}{\pagestyle{empty} \cleardoublepage \pagestyle{fancy}}
 
+
+\newcommand{\EV}[2][]{{\mathbb{E}_{#1}\left[ #2 \right]}}
+
 \newcommand{\vtheta}{{\boldsymbol{\theta}}}
+\newcommand{\de}{\, \textrm{d}}
+\newcommand{\sspace}{\mathcal{S}}
+\newcommand{\aspace}{\mathcal{A}}
+\newcommand{\tfunc}{\mathcal{P}}
+\newcommand{\rfunc}{\mathcal{R}}
+
+\newcommandx{\poladv}[2][1, 2]{\mathbb{A}_{#1}^{#2}}
+\newcommand{\norm}[2][1]{\left\| #2 \right\|_{#1}}
 
 % ===================================================
 % HEADERS AND FOOTERS
@@ -73,6 +104,8 @@
 \include{commitment}
 \smartdoubleflush
 
+\normalfont
+
 \include{summary}
 \smartdoubleflush
 
@@ -84,7 +117,7 @@
  
 
 
-\tableofcontents \thispagestyle{empty}
+\tableofcontents 
 \smartdoubleflush
 
 
@@ -95,12 +128,13 @@
 \include{chapter5} \smartdoubleflush
 
 \phantomsection
+\nocite{*}
 % ---- Bibliography ----
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliographystyle{unsrt}
 \bibliography{biblio}
 \smartdoubleflush
-%\nocite{*}
+
 
 \appendix
 
