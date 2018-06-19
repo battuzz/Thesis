@@ -92,10 +92,9 @@ J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}
 The approach used by Kakade and Langford was really smart and influenced many later works in the last decade. The main contribution though was only theoretical, since the proposed algorithm (CPI) was found to be over-conservative, leading to a slow learning process due to the looseness of the bound. \\
 This problem was addressed by Pirotta et al. \cite{safe_iteration} that derived a tighter bound on policy improvement w.r.t. the one in CPI. They also proposed new algorithms that exploits this tighter bound and experimental results.
 
-\subsection{Preliminaries}
 Before diving into the derivation of the bound on performance improvement, Pirotta et al. derived some bounds on the future state distribution $d_{\mu}^{\pi}$, that are reported here for their generality:
 
-\begin{theorem}
+\begin{theorem}[Adapted from Corollary 3.2 of \cite{safe_iteration}]
 Let $\pi$ and $\pi'$ be two stationary policies for an infinite horizon MDP $\mathcal{M}$. The $L_1$-norm of the difference between their $\gamma$-discounted future state distributions under starting state distribution $\mu$ can be upper bounded as follows:
 \begin{equation}
 \norm{d_{\mu}^{\pi'} - d_{\mu}^{\pi}} \leq \frac{\gamma}{(1-\gamma)^2}D_\infty^{\pi, \pi'}
@@ -106,22 +105,7 @@ D_\infty^{\pi, \pi'} = \sup_{s\in\sspace}\norm{\pi'(\cdot\mid s) - \pi(\cdot \mi
 \end{equation}
 \end{theorem}
 
-We also report here a useful result from Haviv \& Heyden that was used by Pirotta et al. to derive the bound on performance improvement:
-
-\begin{theorem}[Haviv \& Heyden, 1984, Corollary 2.4] \label{th:haviv-heiden}
-For any vector $\boldsymbol{d}$ and any vector $\boldsymbol{c}$ such that $\transpose{\boldsymbol{c}}\boldsymbol{e} = 0$,
-\[
-|\transpose{\boldsymbol{c}}\boldsymbol{d} \leq \norm{\boldsymbol{c}}\frac{\Delta\boldsymbol{d}}{2}
-\] 
-Where
-\[
-\Delta \boldsymbol{d} = \max_{i,j} \left| \boldsymbol{d}_i - \boldsymbol{d}_j \right|
-\]
-\end{theorem}
-
-\subsection{Main results}
-
-Then, by using \Cref{th:kakade-lemma6.1} and \Cref{th:haviv-heiden}, they introduce a tight bound:
+This is a (looser) model-free version of the bound from \cite{safe_iteration}, where the difference between the two distributions depends only on the discount factor $\gamma$ and the difference between the two policies. The next step involved Theorem\ref{th:kakade-lemma6.1} from [TODO CITE KAKADE] to come up with the following bound on performance improvement:
 
 \begin{theorem}\label{th:pirotta-bound1}
 For any stationary policies $\pi$ and $pi'$ and any starting state distribution $\mu$, given any baseline policy $\pi_b$, the difference between the performance of $\pi'$ and the one of $\pi$ can be lower bounded as follows:
@@ -133,6 +117,8 @@ Where
 \Delta A_{\pi}^{\pi'} = \sup_{s, s'\in\sspace}\left|{A_\pi^{\pi'}(s) - A_\pi^{\pi'}(s')}\right|
 \end{equation}
 \end{theorem}
+
+As we can see 
 
 This theorem can be simplified in this:
 
