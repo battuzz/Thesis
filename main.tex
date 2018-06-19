@@ -12,7 +12,10 @@
 \usepackage{hyperref}
 \usepackage{amsthm}
 \usepackage{xargs}
-
+\usepackage{cleveref}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 % ===================================================
 % PAGE LAYOUT
 % ===================================================
@@ -29,7 +32,7 @@
 }
 \setlength\parindent{0cm}
 \setlength\parskip{1em}
-
+\def\labelitemi{--}
 
 %\linespread{1.1}
 
@@ -75,7 +78,7 @@
 
 \newcommandx{\poladv}[2][1, 2]{\mathbb{A}_{#1}^{#2}}
 \newcommand{\norm}[2][1]{\left\| #2 \right\|_{#1}}
-
+\newcommand{\transpose}[1]{{#1}^{\mathsf{T}}}
 % ===================================================
 % HEADERS AND FOOTERS
 % ===================================================

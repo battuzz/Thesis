@@ -2,42 +2,47 @@
 \label{ch:safepg}
 \thispagestyle{empty}
 
-\begin{quotation}
-{\footnotesize
-\noindent{\emph{``Bud: Apri!\\
-Cattivo: Perch\`e, altrimenti vi arrabbiate?\\
-Bud e Terence: Siamo gi\`a arrabbiati!''}}
-\begin{flushright}
-Altrimenti ci arrabbiamo
-\end{flushright}
-}
-\end{quotation}
-\vspace{0.5cm}
+Starting with the motivation and definition of safe policy gradient in Section~\ref{sec:whysafety}, the following sections will dive into the details of several methods to address this problem. We will start from Conservative Policy Iteration in section~\ref{sec:cpi} that is considered one of the pioneers in this field. This work, in fact, set the basis for several further developments. Pirotta et al. studied a more general bound for policy iteration described in Section~\ref{sec:spi}, that was later applied to policy gradient methods (Section~\ref{sec:ass}). On this line of research, Papini et al. considered also an adapting batch size, as explained in Section~\ref{sec:abs}. Following a different approach, [TODO TRPO] extended the result in CPI and developed a general algorithm called Trust Region Policy Optimization (TRPO) as described in Section~\ref{sec:trpo}. 
 
-\noindent In questa sezione si deve descrivere l'obiettivo della ricerca, le problematiche affrontate ed eventuali definizioni preliminari nel caso la tesi sia di carattere teorico.
+\section{Safety in Reinforcement Learning}
+\label{sec:whysafety}
+In this section we will formalize the concept of safety in reinforcement learning. While the learning methods presented in Chapter~\ref{ch:rl} performs really well on exact problems, some problems arise when we consider model-free control because we need to make several approximations that can harm the online performance. More specifically the two main sources of approximations are: 
+\begin{itemize}
+\item The length of the collected trajectories is limited when we consider an infinite-horizon MDP. Hence, the cumulative reward function becomes a truncated sum, thus we induce an approximation error.
+\item The number of trajectories used to estimate the value functions or the policy gradient is limited. The number of collected trajectories is usually called batch size. Using large batch sizes can marginalize the problem, but this comes to the cost of collecting more samples, which may be unfeasible in many applications.
+\end{itemize}
 
+These approximation errors induce some oscillation in the policy performance, either because the update direction is wrong or the magnitude of the estimate is too high and we have an overshooting. Even though this oscillation can be tolerable during the learning phase in some applications, it may become unbearable in some other situations that require a more reliable approach (e.g. robotic control). This is known in literature as the Policy Oscillation Problem \cite{Bertsekas2011}, \cite{NIPS2011_4274}. These oscillations can affect learning in several ways:
+\begin{itemize}
+\item Dangerous behaviours: in an on-line scenario, a low peak in policy performance can result in a critical interaction with the environment. This can be the case of Autonomous Driving, where a bad action choice can cause several problems.
+\item Poor on-line performance: consider an automatic production line where we want to improve the total production over several days while maintaining the production high every day. A low peak on performance negatively impacts production and generates costs.
+\item Selection of sub-optimal policies: if we stop the learning phase after a fixed number of iterations, we may end up in a low peak. Detecting the low peak and manually reject previous policies can be a difficult and sometimes prohibitive task.
+\end{itemize}
 
-\begin{definition}[Safe policy]
-Given a (user specified) lower-bound, $J_{-}$, on the performance and a confidence level, $\delta$, we call an RL algorithm safe if it ensures that the probability that a policy with performance less than $J_{-}$ will be proposed is at most $\delta$.
- 
+Safe approaches to reinforcement learning aims at guaranteeing performance improvements in spite of approximation, maintaining  sampling costs to an acceptable level.
+In order to start with the several approaches that tries to overcome these problems, we summarize the above statements and formalize the concept of a safe learning algorithm:
+\begin{definition}[Safe Learning Algorithm]
+Given a (user specified) lower-bound, $\underline{J}$, on the performance and a confidence level, $\delta$, we call an RL algorithm safe if it ensures that the probability that a policy with performance less than $\underline{J}$ will be proposed is at most $\delta$.
 \end{definition}
 
-\section{Kakade}
-
-Kakade 2002 first considered Monotonic Improvement in policy iteration. Considering a policy update that is a convex combination between the current policy $\pi$ and the greedy policy $\overline{\pi}$:
+\section{Conservative Policy Iteration}
+\label{sec:cpi}
+Kakade and Langford [TODO REF] proposed a novel solution to guarantee monotonic improvements in a policy iteration method. They faced the policy oscillation problem by limiting the magnitude of the policy updates in the following form:
 \begin{equation}
 \pi' = (1-\alpha )\pi + \alpha\overline{\pi} \label{eq:kakade-update}
 \end{equation}
-With $\alpha = 1$ we have the 'normal' policy iteration. But this is not guaranteed to be safe, so we choose $\alpha < 1$ to make smaller updates and to guarantee an improvement.
-
-\begin{theorem}[Kakade 2002]
-Using update rule \ref{eq:kakade-update}, the performance improvement is guaranteed as follows:
+where the current policy $\pi$ is updated with a convex combination between the current policy $\pi$ and the greedy policy $\overline{\pi}$ with a factor $\alpha \in [0,1]$, also called learning factor.
+When $\alpha = 1$ we have the usual policy iteration as described in Chapter~\ref{ch:rl}. This update is not guaranteed to be safe in general. Kakade considered a conservative approach to safety by choosing $\alpha < 1$ and make smaller updates that guarantee an improvement.
+A first result achieved by Kakade is summarized in Theorem~\ref{th:kakade1}:
+\begin{theorem}[Adapted from Theorem 4.1, Kakade 2002]
+\label{th:kakade1}
+Assuming a policy update of the form~\ref{eq:kakade-update} in a policy iteration setting, the following performance improvement is guaranteed for all $\alpha \in [0,1]$:
 \begin{equation}
-J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{\alpha}{1 - \gamma}\left( \poladv[\pi, \mu](\overline{\pi}) - \frac{2\alpha \gamma \epsilon}{1 - \gamma (1 - \alpha)} \right) \label{eq:kakade-improvement}
+J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{\alpha}{1 - \gamma}\left( \poladv[\pi, \mu][\overline{\pi}] - \frac{2\alpha \gamma \epsilon}{1 - \gamma (1 - \alpha)} \right) \label{eq:kakade-improvement}
 \end{equation}
 Where:
 \begin{equation}
-\poladv[\pi, \mu](\overline{\pi}) = \EV[s\sim d_{\pi, \mu}]{ \EV[a\sim\overline{\pi}]{A_{\pi}(s,a)}}
+\poladv[\pi, \mu][\overline{\pi}] = \EV[s\sim d_{\pi, \mu}]{ \EV[a\sim\overline{\pi}]{A_{\pi}(s,a)}}
 \end{equation}
 is the policy advantage function and
 \begin{equation}
@@ -45,41 +50,118 @@ is the policy advantage function and
 \end{equation}
 \end{theorem}
 
-\begin{theorem}
+This result can be analysed as follows: the first term is analogous to the first order expansion of the performance measure $J$ with respect to $\alpha$ and is related to the policy advantage function, while the second term is a penalization term that prevents taking large values of $\alpha$. These two terms are in contrast, thus posing a trade-off condition between the expected advantage given by the first term and the magnitude of the update that can harm monotonic improvements given by the second term. Given this result, an algorithm can be developed as follows:
+
+\begin{theorem}[Adapted from Corollary 4.2, Kakade 2002]
 Let $R$ be the maximal possible reward. Using update rule \ref{eq:kakade-update}, if $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ the performance bound \ref{eq:kakade-improvement} is maximized by choosing:
 \begin{equation}
-\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu](\overline{\pi})}{4R}
+\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu][\overline{\pi}]}{4R}
 \end{equation}
 thus guaranteeing a policy improvement of:
 \begin{equation}
-J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{{\poladv[\pi, \mu](\overline{\pi})}^2}{8R}
+J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{{\poladv[\pi, \mu][\overline{\pi}]}^2}{8R}
 \end{equation}
 \end{theorem}
 
-The algorithm that follows these rules is called CPI (Conservative Policy Iteration).
+This algorithm is a generalization of the policy iteration algorithm introduced in Chapter~\ref{ch:rl} as it adapts the magnitude of the update with a the learning factor $\alpha$ in order to maximize the guaranteed improvement $J_\mu(\pi') - J_\mu(\pi)$. This algorithm was named Conservative Policy Iteration (CPI) after its tendency to make conservative policy updates. The pseudo-code of CPI is reported in Algorithm~\ref{alg:kakade}. 
 
-A notable result from Kakade 2002 is this one: 
-\begin{theorem}[Lemma 6.1 from Kakade 2002]
+\begin{algorithm}[t]
+\caption{Conservative Policy Iteration}\label{alg:kakade}
+\begin{algorithmic}
+\State Initialize policy $\pi^0$ arbitrarily.
+\For{$t=0,1,2 \ldots$ until convergence}
+\State Evaluate current policy $\pi^t$
+\State Compute target $\overline{\pi}(s)\in\arg\max_{a\in\aspace}{\hat{Q}^\pi (s,a)}$
+\State Compute advantage policy function $\poladv[\pi,\mu][\overline{\pi}]$
+\State Compute $\alpha^* = \min\left\{ \frac{(1-\gamma)\poladv[\pi, \mu][\overline{\pi}]}{4R}, 1 \right\}$
+\State Update policy $\pi^{t+1} \gets \alpha^* \pi^t + (1 - \alpha^*)\overline{\pi}^t$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+It is also useful to report a notable and general result from Kakade, 2002 that will be used as a starting point for more advanced bounds in the next sections: 
+\begin{theorem}[Lemma 6.1 from Kakade 2002]\label{th:kakade-lemma6.1}
 For any policies $\tilde{\pi}$ and $\pi$ and any starting state distribution $\mu$,
 \begin{equation}
-J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}d_{\tilde{\pi}, \mu}]{A_{\pi}(s,a)} \label{eq:kakade-lemma6.1}
+J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}d_{\tilde{\pi}, \mu}]{A_{\pi}(s,a)} 
 \end{equation} 
 \end{theorem}
 
 \section{Safe policy iteration}
-First off, they developed some bounds on the future state distribution $d_{\mu}^{\pi}$:
+\label{sec:spi}
+The approach used by Kakade and Langford was really smart and influenced many later works in the last decade. The main contribution though was only theoretical, since the proposed algorithm (CPI) was found to be over-conservative, leading to a slow learning process due to the looseness of the bound. \\
+This problem was addressed by Pirotta et al. \cite{safe_iteration} that derived a tighter bound on policy improvement w.r.t. the one in CPI. They also proposed new algorithms that exploits this tighter bound and experimental results.
+
+\subsection{Preliminaries}
+Before diving into the derivation of the bound on performance improvement, Pirotta et al. derived some bounds on the future state distribution $d_{\mu}^{\pi}$, that are reported here for their generality:
+
 \begin{theorem}
-Let $\pi$ and $\pi'$ be two stationary policies for an infinite horizon MDP M with state transition $\tfunc$. The $L_1$-norm of the difference between their $\gamma$-discounted future state distributions under starting state distribution $\mu$ can be upper bounded as follows:
+Let $\pi$ and $\pi'$ be two stationary policies for an infinite horizon MDP $\mathcal{M}$. The $L_1$-norm of the difference between their $\gamma$-discounted future state distributions under starting state distribution $\mu$ can be upper bounded as follows:
 \begin{equation}
-\norm{d_{\mu}^{\pi'}(s) - d_{\mu}^{\pi}(s)} \leq \frac{\gamma}{1-\gamma}\norm[\infty]{\sum_{a\in\aspace}\left(\pi'(a\mid s) - \pi(a\mid s)\right)\tfunc(s,a)}\norm[\infty]{1-\gamma P}
+\norm{d_{\mu}^{\pi'} - d_{\mu}^{\pi}} \leq \frac{\gamma}{(1-\gamma)^2}D_\infty^{\pi, \pi'}
+\end{equation}
+Where:
+\begin{equation}
+D_\infty^{\pi, \pi'} = \sup_{s\in\sspace}\norm{\pi'(\cdot\mid s) - \pi(\cdot \mid s)}
 \end{equation}
 \end{theorem}
 
+We also report here a useful result from Haviv \& Heyden that was used by Pirotta et al. to derive the bound on performance improvement:
 
-\begin{theorem}
-Let $\pi$ and $\pi'$ be two stationary policies for an infinite horizon MDP M. The $L_1$-norm of the difference between their $\gamma$-discounted future state distributions under starting state distribution $\mu$ can be upper bounded as follows:
+\begin{theorem}[Haviv \& Heyden, 1984, Corollary 2.4] \label{th:haviv-heiden}
+For any vector $\boldsymbol{d}$ and any vector $\boldsymbol{c}$ such that $\transpose{\boldsymbol{c}}\boldsymbol{e} = 0$,
+\[
+|\transpose{\boldsymbol{c}}\boldsymbol{d} \leq \norm{\boldsymbol{c}}\frac{\Delta\boldsymbol{d}}{2}
+\] 
+Where
+\[
+\Delta \boldsymbol{d} = \max_{i,j} \left| \boldsymbol{d}_i - \boldsymbol{d}_j \right|
+\]
+\end{theorem}
+
+\subsection{Main results}
+
+Then, by using \Cref{th:kakade-lemma6.1} and \Cref{th:haviv-heiden}, they introduce a tight bound:
+
+\begin{theorem}\label{th:pirotta-bound1}
+For any stationary policies $\pi$ and $pi'$ and any starting state distribution $\mu$, given any baseline policy $\pi_b$, the difference between the performance of $\pi'$ and the one of $\pi$ can be lower bounded as follows:
 \begin{equation}
-\norm{d_{\mu}^{\pi'} - d_{\mu}^{\pi}} \leq \frac{\gamma}{(1-\gamma)^2}\sup_{s\in\sspace}\norm{\pi'(\cdot\mid s) - \pi(\cdot \mid s)}
+J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\transpose{d_\mu^{\pi_b}}A_\pi^{\pi'}}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi_b, \pi'}} \frac{\Delta A_{\pi}^{\pi'}}{2}
+\end{equation}
+Where
+\begin{equation}
+\Delta A_{\pi}^{\pi'} = \sup_{s, s'\in\sspace}\left|{A_\pi^{\pi'}(s) - A_\pi^{\pi'}(s')}\right|
 \end{equation}
 \end{theorem}
 
+This theorem can be simplified in this:
+
+\begin{theorem}
+For any stationary policies $\pi$ and $pi'$ and any starting state distribution $\mu$ the difference between the performance of $\pi'$ and the one of $\pi$ can be lower bounded as follows:
+\begin{equation}
+J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\poladv[\pi, \mu][\pi']}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi, \pi'}}^2 \frac{\norm[\infty]{Q^\pi}}{2}
+\end{equation}
+\end{theorem}
+
+\begin{note}
+In the original paper, Pirotta et al. uses the un-normalized state occupancy $d_{\mu}^{\pi} = \sum_{t=0}^{\infty}\gamma^t Pr(s_t = s \mid \pi, \mu)$ instead of the normalized future state distribution $d_{\mu}^{\pi} = (1-\gamma)\sum_{t=0}^{\infty}\gamma^t Pr(s_t = s \mid \pi, \mu)$ as in this work. This introduces a normalization factor $1-\gamma$ that has to be considered.
+\end{note}
+
+\subsection{Algorithm}
+\begin{theorem}
+If $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ then, using update rule \ref{eq:kakade-improvement} with $\alpha = \min(\, \alpha^*)$, $\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu][\overline{\pi}]}{\gamma D_\infty^{\pi, \pi'}\Delta A_\pi^{\pi'}}$ we have:
+\begin{itemize}
+\item $\alpha^* \leq 1$ the following policy improvement is guaranteed:
+\[
+J_\mu^{\pi'} - J_\mu^\pi \geq \frac{{\poladv[\pi, \mu][\pi']}^2}{2\gamma D_\infty^{\pi, \overline{\pi}}\Delta A_\pi^{\overline{\pi}}}
+\]
+\item $\alpha^* > 1$ we have a full update toward $\overline{\pi}$ and a guarantee of like specified in \Cref{th:pirotta-bound1}:
+\begin{equation}
+J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\transpose{d_\mu^{\pi_b}}A_\pi^{\pi'}}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi_b, \pi'}} \frac{\Delta A_{\pi}^{\pi'}}{2}
+\end{equation}
+\end{itemize}
+\end{theorem}
+
+
+\section{Trust Region Policy Optimization}
+\label{sec:trpo}
