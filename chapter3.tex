@@ -178,7 +178,6 @@ J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{1-\gamma}\int_{\sspace} d_\mu^{\p
 \]
 where $\norm[\infty]{Q^{\pi_{\vtheta}}}$ is the supremum norm of the Q-function: $\norm[\infty]{Q^{\pi_{\vtheta}}}=\sup\limits_{\substack{s\in\sspace, a\in\aspace}}Q^{\pi_{\vtheta}}(s,a)$
 \end{theorem}
-\newcommand*{\gradj}{\nabla_{\vtheta}J_\mu(\vtheta)}
 Here again we have two terms, the first related with the policy advantage function $\poladv[\pi_{\vtheta},\mu][\pi_{\vtheta'}]$ that encodes how much the target policy $\pi_{\vtheta'}$ performs better than $\pi_{\vtheta}$, while the second term is a penalty term driven by the distance between the two policies in infinite norm. \\
 Following this extension, they provided a new formulation for the difference between two policies that was used to build the following bound by fixing the update rule $\vtheta' = \vtheta + \alpha \gradj$:
 

@@ -14,3 +14,11 @@ Chi trova un amico trova un tesoro
 
 \noindent In questa sezione si spiega come \`e stato affrontato il problema concettualmente, la soluzione logica che ne \`e seguita senza la documentazione.
 
+
+
+
+
+
+One of the challenges that arise in reinforcement learning - opposed to other kinds of learning - is the trade-off between exploration and exploitation. To obtain a lot of reward, a reinforcement learning agent must prefer actions that it has tried in the past and found to be effective in producing reward. At the same time, though, discovering such actions requires a trial and error search. The agent has to exploit what it has already experienced in order to obtain reward, but it also has to explore in order to make better action selections in the future. This dilemma is that neither exploration not exploitation can be pursued exclusively without failing at the task: a fully exploit algorithm would likely choose sub-optimal actions while a fully exploratory behaviour will likely to take random actions without long-time awareness.\\
+The agent must try a variety of actions and progressively favour those that appear to be the best. This dilemma can be made even harder when we consider stochastic rewards, where the agents must try the same actions multiple times to be sure about its estimated value. \\
+The exploration-exploitation dilemma has been studied intensively for many decades, yet remains unsolved.
