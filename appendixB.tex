@@ -1,5 +1,151 @@
-\chapter{Documentazione della}
-\label{appendiceB}
+\chapter{Estimating $\gradDelta(\vv, w)$}\label{app:estimating}
 \thispagestyle{empty}
 
-\noindent Documentazione della programmazione in piccolo dove si mostra la struttura ed eventualmente l'albero di Jackson.
+
+
+In this section we will see how to estimate $\gradDelta(\vv, w)$ from trajectories. To simplify a bit the calculations, we will derive $\nabla_{\sigma}\Deltav(\vv, \sigma)$ so that $\gradDelta(\vv, w)$ can be calculated by chain rule: 
+\begin{equation}
+\gradDelta(\vv, w) = e^w \nabla_{\sigma}\Deltav(\vv, e^w)
+\end{equation}
+From definition: $\Deltav(\vtheta) := \frac{\norm[2]{\nabla_{\vv}J(\vtheta)}^2}{4mc} = \frac{1}{2m} \alpha^* \norm[2]{\nabla_{\vv}J(\vtheta)}^2$. 
+where $\alpha^*$ is the optimal step size from~\cite{adaptive_step}:
+\begin{align*}
+&\alpha^* = \frac{c_1 \we[3]}{m(c_2 \we + c_3)},\\
+&c_1 = (1-\gamma)^3\sqrt{2\pi},\\
+&c_2 = \gamma\sqrt{2\pi}RM_{\phi}^2,\\
+&c_3 = 2(1-\gamma)|\mathcal{A}|RM_{\phi}^2.
+\end{align*}
+The improvement direction of $\sigma$ w.r.t. this surrogate objective $\Deltav(\vtheta)$ is:
+\begin{equation*}
+\nabla_{\sigma}\left(\frac{1}{2m}\alpha^*\norm[2]{\gradJ[\vv]{\vtheta}}^2\right) 
+=  \frac{1}{2m} \nabla_{\sigma}\alpha^*  \norm[2]{\gradJ[\vv]{\vtheta}}^2
++ \frac{1}{2m}\alpha^*\nabla_{\sigma}\norm[2]{\gradJ[\vv]{\vtheta}}^2.
+\end{equation*}
+Where we can further derive the two terms:
+\begin{equation*}
+\nabla_{\sigma}\alpha^* = \frac{2c_1c_2\we + 3c_1c_3}{m(c_2\we + c_3)^2}\we[2]
+\quad;\quad
+\nabla_{\sigma}\norm[2]{\gradJ[\vv]{\vtheta}}^2 =  2\langle\gradJ[\vv]{\vtheta}, \nabla_{\sigma}\gradJ[\vv]{\vtheta}\rangle.
+\end{equation*}
+Where $\langle\cdot\rangle$ here denotes scalar product between vectors. Recalling that:
+\begin{align*}
+\nabla_{\sigma}\nabla_{\vv}\log p_{\vtheta}\left(\tau\right)&=\sum_{t=0}^{H}\nabla_{\sigma}\nabla_{\vv}\log\pi_{\vtheta}\left(a\mid s\right)
+ = \sum_{t=0}^{H}\nabla_{\sigma}\frac{a-\mu_{\vtheta}(s)}{\sigma_{\vtheta}^2}
+ = -\frac{2}{\sigma} \sum_{t=0}^{H}\frac{a-\mu_{\vtheta}}{\sigma_{\vtheta}^2}  =\\ &= 
+ -\frac{2 }{\sigma}\nabla_{\vv}\log p_{\vtheta}(\tau),
+\end{align*}
+we can develop the mixed derivative $\nabla_{\sigma}\nabla_{\vv}J(\vtheta)$ using the log-trick:
+\begin{align*}
+\nabla_{\sigma}\gradJ[\vv]{\vtheta} &= \nabla_{\sigma}\EV[\tau\sim p_{\vtheta}]{\score{\vv}R(\tau)} = \\
+&= \EV[\tau\sim p_{\vtheta}]{\score{\sigma}\score{\vv}R(\tau)} + \EV[\tau\sim p_{\vtheta}]{\nabla_{\sigma}\score{\vv}R(\tau)} \\
+& = \EV[\tau\sim p_{\vtheta}]{\score{\sigma}\score{\vv}R(\tau)} - \frac{2}{\sigma}\gradJ[\vv]{\vtheta} \\
+&= h(\vtheta) - \frac{2}{\sigma}\gradJ[\vv]{\vtheta},
+\end{align*}
+where $h(\vtheta)\coloneqq\EV[\tau\sim p_{\vtheta}]{\score{\sigma}\score{\vv}R(\tau)}$.
+
+
+\section{Estimating $h(\vtheta)$}
+
+In this part we will derive an estimator for $h(\vtheta)$. 
+
+\begin{theorem}
+Assuming Gaussian policies, an unbiased estimator for 
+\begin{align}
+h(\vtheta) = \EV[\tau\sim p_{\vtheta}]{\score{\sigma}\score{\vv}R(\tau)}
+\end{align}
+is:
+\begin{equation}
+\hat{h}(\vtheta) =  \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma} \right)\left(\gradlogsumpi{h'}{0}{t}{\vv} \right)\de\tau
+\end{equation}
+\end{theorem}
+\begin{proof}
+Let's denote $\pi_k = \pi_{\vtheta}(a_k \mid s_k)$. Then, by splitting the trajectory and using the same observation as in GPOMDP estimator in~\cite{peters}, the estimator $h(\vtheta)$ can be splitted in the sum of four components:
+\begin{align}
+h\left({\vtheta}\right) &= \int_T p_{\vtheta}\left(\tau_{0:H}\right)\score[\vtheta]{\sigma} \score[\vtheta]{\vv}R(\tau)\de\tau \notag
+= \\&=
+\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\left(\sum_{t=0}^{H}\gamma^{t}r_t\right)\left(\gradlogsumpi{k}{0}{H}{\sigma}\right)\left(\gradlogsumpi{h}{0}{H}{\vv}\right) \de\tau \notag 
+=\\&=
+ \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma} \right)\left(\gradlogsumpi{h'}{0}{t}{\vv} \right)\de\tau  \label{first} 
++\\&+ 
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma} \right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv} \right)\de\tau  \label{second} 
++\\&+ 
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k''}{t+1}{H}{\sigma} \right)\left(\gradlogsumpi{h'}{0}{t}{\vv} \right)\de\tau  \label{third} 
++\\&+ 
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k''}{t+1}{H}{\sigma} \right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv} \right)\de\tau.  \label{forth}
+ \end{align}
+Next, we will show that (\ref{second}), (\ref{third}) and (\ref{forth}) will both evaluate to $0$:
+\allowdisplaybreaks
+\begin{align*}
+(\ref{second})
+&=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma} \right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv} \right)\de\tau 
+=\\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\int_{T}p_{\vtheta}\left(\tau_{t+1:H}\right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv}\right)\de\tau 
+=\\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\int_{T}p_{\vtheta}\left(\tau_{t+1:H}\right)\nabla_{\vv}\log p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
+=\\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\int_{T}\nabla_{\vv} p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
+=\\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\nabla_{\vv}\int_{T} p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
+=\\ &= 0
+\end{align*}
+\allowdisplaybreaks[0]
+Using the same approach of (\ref{second}) we can say that (\ref{third}) = 0
+\allowdisplaybreaks
+\begin{align*}
+(\ref{forth})
+&=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k''}{t+1}{H}{\sigma} \right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv} \right)\de\tau
+= \\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}p_{\vtheta}\left(\tau_{t+1:H}\right)\nabla_{\sigma}\log p_{\vtheta}\left(\tau_{t+1:H}\right)\nabla_{\vv}\log p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
+= \\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}\left( \nabla_{\sigma}\nabla_{\vv}p_{\vtheta}(\tau_{t+1:H}) - \nabla_{\sigma}\nabla_{\vv}\log p_{\vtheta}(\tau_{t+1:H}) \right)\de\tau
+= \\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T} \nabla_{\sigma}\nabla_{\vv}p_{\vtheta}(\tau_{t+1:H})\de\tau -\\&\qquad\qquad- \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}\nabla_{\sigma}\nabla_{\vv}\log p_{\vtheta}(\tau_{t+1:H}) \de\tau
+= \\ &=
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}d\tau\nabla_{\sigma}\nabla_{\vv}\int_{T} p_{\vtheta}(\tau_{t+1:H})\de\tau -\\&\qquad\qquad -\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}-\frac{2}{\sigma}p_{\vtheta}(\tau_{t+1:H})\nabla_{\vv}\log p_{\vtheta}(\tau_{t+1:H}) \de\tau
+= \\ &=
+\frac{2}{\sigma}\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}p_{\vtheta}(\tau)\nabla_{\vv}\log p_{\vtheta}(\tau_{t+1:H}) \de\tau
+= \\ &=
+\frac{2}{\sigma}\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}\nabla_{\vv} p_{\vtheta}(\tau_{t+1:H}) \de\tau
+= 0.
+\end{align*}
+\allowdisplaybreaks[0]
+\end{proof}
+
+\section{Baseline for $\hat{h}(\vtheta)$}
+
+Let $\hat{h_{t}}(\vtheta) = \EV{ \underbrace{\left(\sum_{k=0}^{t} \nabla_{\theta}\log\pi_{k} \right)}_{G_t} \underbrace{ \left(\sum_{k=0}^{t} \nabla_{\sigma}\log\pi_{k} \right) }_{H_t} \left( \underbrace{\gamma^{t}r_{t}}_{F_t} - b_t\right) }$ where $b_t$ is a generic baseline that is independent w.r.t. the actions $a_k$.
+
+Any baseline $b_t = \tilde{b_t}\left(\frac{G_{t} + H_{t}}{G_{t}H_{t}}\right)$ will keep the estimator unbiased for any value of $\tilde{b_t}$:
+\allowdisplaybreaks
+\begin{align*}
+E\left[ G_{t}H_{t}\left(F_t - b_t\right) \right] 
+&= 
+E\left[ G_{t}H_{t}F_t\right] - E\left[G_{t}H_{t}b_t \right]
+= \\ &=
+E\left[ G_{t}H_{t}F_t\right] - E\left[G_{t}H_{t}\tilde{b_t}\left(\frac{G_{t} + H_{t}}{G_{t}H_{t}}\right) \right]
+= \\ &=
+E\left[ G_{t}H_{t}F_t\right] - \tilde{b_t}E\left[G_{t} \right] - \tilde{b_t}\left[H_{t} \right]
+= \\ &=
+E\left[ G_{t}H_{t}F_t\right].
+\end{align*}
+\allowdisplaybreaks[0]
+We choose $\tilde{b_t}$ to minimize the variance of $\hat{h_t}$:
+\allowdisplaybreaks
+\begin{align*}
+Var[\hat{h_t}] &= E\left[\hat{h_{t}}^2\right] - E\left[\hat{h_t}\right]^2
+= \\ &=
+E\left[ G_t^2 H_t^2 \left(F_t^2 - 2F_{t}\tilde{b_t}\frac{G_t+H_t}{G_t H_t} + \tilde{b_t}^2\frac{(G_t + H_t)^2}{G_t^2 H_t^2}\right) \right] - E\left[G_t H_t F_t\right]^2
+= \\ &=
+E\left[ G_t^2 H_t^2 F_t^2 \right] - 2\tilde{b_t}E\left[ G_t H_t F_t \left(G_t + H_t\right) \right] + \tilde{b_t}^2E\left[ \left(G_t + H_t\right)^2 \right] - E\left[G_t H_t F_t\right]^2
+\end{align*}
+\allowdisplaybreaks[0]
+\begin{align*}
+b_t^* = \arg\min_{\tilde{b_t}} Var\left[\hat{h_t}\right] = \frac{E\left[G_t H_t F_t \left(G_t + H_t\right)\right]}{E\left[\left(G_t + H_t\right)^2\right]}.
+\end{align*}
+Hence the estimator has minimum variance with baseline:
+\begin{align*}
+b_t = b_t^* \frac{G_t + H_t}{G_t H_t} = \frac{\left< G_t H_t F_t \left(G_t + H_t\right) \right>}{\left< \left( G_t + H_t \right)^2 \right>}\frac{G_t + H_t}{G_t H_t}
+\end{align*}
+

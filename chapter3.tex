@@ -2,43 +2,43 @@
 \label{ch:safepg}
 \thispagestyle{empty}
 
-In this chapter we will describe what are some problems that can arise from RL techniques and why it is important to develop safe learning algorithms. \\
-We will start with the motivation of safe policy improvement in \Cref{sec:whysafety}, and then dive into the details of several methods to address this problem. We will start from Conservative Policy Iteration in \Cref{sec:cpi} that is considered one of the pioneers in this field. This work, in fact, set the basis for several further developments. Pirotta et al. studied a more general bound for policy iteration described in \Cref{sec:spi}, that was later applied to policy gradient methods (\Cref{sec:ass}). On this line of research, Papini et al. considered also an adapting batch size, as explained in \Cref{sec:abs}. Following a different approach, Shulman et al. extended the result in CPI and developed a general algorithm called Trust Region Policy Optimization (TRPO) as described in \Cref{sec:trpo}. Finally, in \Cref{sec:other-safe} we will briefly describe other approaches to safe policy improvements that no longer assume monotonic improvement.
+In this chapter, we will describe some problems that can arise from RL techniques and why it is important to develop safe learning algorithms. \\
+We will start with the motivation of safe policy improvement in \Cref{sec:whysafety}, then dive into the details of several methods to address this problem. We will start from Conservative Policy Iteration (CPI)~\cite{Kakade02approximatelyoptimal}, in \Cref{sec:cpi}, that is considered one of the seminal works in this field. This work, in fact, sets the basis for several further developments. Pirotta et al.~\cite{safe_iteration} studied a more general bound for policy iteration, described in \Cref{sec:spi}, that was later applied to policy gradient methods~\cite{adaptive_step} (\Cref{sec:ass}). On this line of research, Papini et al.~\cite{adaptive_batch} considered also an adaptive batch size, as explained in \Cref{sec:abs}. Following a different approach, Shulman et al.~\cite{trpo} extended the result from CPI and developed a general algorithm called Trust Region Policy Optimization (TRPO), as described in \Cref{sec:trpo}. Finally, in \Cref{sec:other-safe}, we will briefly describe other approaches to safe policy improvements that no longer require monotonic improvement.
 
 \section{Safety in Reinforcement Learning}
 \label{sec:whysafety}
-In this section we will formalize the concept of safety in reinforcement learning. While the learning methods presented in Chapter~\ref{ch:rl} can perform really well in the exact case, some problems arise when we consider model-free control with approximations, since we have to estimate some quantities and the variance of these estimations can harm the online performance. \\
+In this section, we will formalize the concept of safety in reinforcement learning. While the learning methods presented in Chapter~\ref{ch:rl} can perform well in the exact case, some problems arise when we consider model-free control. In this latter case, in fact, we have to estimate some quantities and the uncertainty of these estimates can harm the online performance. \\
 More specifically the two main sources of approximations are: 
 \begin{itemize}
-\item The length of the collected trajectories is limited when we consider an infinite-horizon MDP. Hence, the cumulative reward function becomes a truncated sum, thus introducing an approximation error.
-\item The number of trajectories used to estimate the value functions or the policy gradient is limited. The number of collected trajectories is usually called batch size. Using large batch sizes can marginalize the problem, but this comes to the cost of collecting more samples, which may be unfeasible in many applications.
+\item The length of the collected trajectories is limited when we consider an infinite-horizon MDP. Hence, the cumulative reward function becomes a truncated sum, thus introducing an approximation error. This truncation can add a bias term in the estimations. 
+\item The number of trajectories used to estimate the value functions or the policy gradient is limited. The number of collected trajectories is usually called batch size. This factor introduces variance in the estimations. Using large batch sizes can limit the problem (reduce variance), but this comes to the cost of collecting more samples, which may be unfeasible in many applications.
 \end{itemize}
 
-These approximation errors induce some oscillation in the policy performance, either because the update direction is wrong or the magnitude of the estimate is too high and we incur in an overshooting. Even though this oscillation can be tolerable during the learning phase in some applications, it may become unbearable in some other situations that require a more reliable approach (e.g. robotic control). This is known in literature as the Policy Oscillation Problem \cite{Bertsekas2011}, \cite{NIPS2011_4274}. These oscillations can affect learning in several ways:
+These approximation errors induce some oscillations in the policy performance, either because the update direction is wrong or the magnitude of the estimate is too high and we incur in an overshooting. Even though these oscillations can be tolerable during the learning phase in some applications, it may become unbearable in some other situations that require a more reliable approach (e.g. robotic control). This is known in literature as the Policy-Oscillation Problem \cite{Bertsekas2011}, \cite{NIPS2011_4274}. These oscillations can affect learning in several ways:
 \begin{itemize}
 \item \textbf{Dangerous behaviours}: in an on-line scenario, a low peak in policy performance can result in a critical interaction with the environment. This can be the case of Autonomous Driving, where a bad action choice can cause several problems.
 \item \textbf{Poor on-line performance}: consider an automatic production line where we want to improve the total production over several days while maintaining the production high every day. A low peak on performance negatively impacts production and generates costs.
 \item Selection of \textbf{sub-optimal policies}: if we stop the learning phase after a fixed number of iterations, we may end up in a low peak. Detecting the low peak and manually reject previous policies can be a difficult and sometimes prohibitive task.
 \end{itemize}
 
-Safe approaches to reinforcement learning aims at guaranteeing performance improvements in spite of approximation, while maintaining the costs of collecting samples to an acceptable level.
+Safe approaches to reinforcement learning aims at guaranteeing performance improvements in spite of approximations, while maintaining the costs of collecting samples to an acceptable level.
 In order to start with the several approaches that tries to overcome these problems, we summarize the above statements and formalize the concept of a safe learning algorithm:
 \begin{definition}[Safe Learning Algorithm]
 \label{def:safety}
-Given a (user specified) lower-bound, $\underline{J}$, on the performance and a confidence level, $\delta$, we call an RL algorithm safe if it ensures that the probability that a policy with performance less than $\underline{J}$ will be proposed is at most $\delta$.
+Given a (user-specified) lower-bound $\underline{J}$ on the performance and a confidence level $\delta$, we call an RL algorithm safe if it ensures that the probability that a policy with performance less than $\underline{J}$ will be proposed is at most $\delta$.
 \end{definition}
 
-Note that this is a general definition and accounts for safe improvements in high probability. A special case can be defined when the reference bound $\underline{J}$ is set to the performance of the policy at the previous iteration: $\underline{J}^{(t)} = J^{(t-1)}$. In this case we can guarantee monotonic improvements.\\
-The proposed methods below will consider this latter monotonic improvement case, with the exception of~\Cref{sec:other-safe} that will consider the more general case where $\underline{J}$ is user-defined.
+Note that this is a general definition and accounts for safe improvements in high probability. A special case can be defined when the reference bound $\underline{J}$ is set to the performance of the policy at the previous iteration: $\underline{J}^{(t)} = J^{(t-1)}$. In this case we can guarantee monotonic improvement.\\
+The proposed methods below will consider this latter monotonic improvement case, with the exception of~\Cref{sec:other-safe}, that will consider the more general case where $\underline{J}$ is user-defined.
 
 \section{Conservative Policy Iteration}
 \label{sec:cpi}
-Kakade and Langford \cite{Kakade02approximatelyoptimal} proposed a novel solution to guarantee monotonic improvements in a policy iteration method. They faced the policy oscillation problem by limiting the magnitude of the policy updates in the following form:
+Kakade and Langford \cite{Kakade02approximatelyoptimal} proposed a novel solution to guarantee monotonic improvement in a policy iteration method. They faced the policy oscillation problem by limiting the magnitude of the policy updates in the following form:
 \begin{equation}
 \pi' = (1-\alpha )\pi + \alpha\overline{\pi} \label{eq:kakade-update}
 \end{equation}
 where the current policy $\pi$ is updated with a convex combination between the current policy $\pi$ and the greedy policy $\overline{\pi}$ with a factor $\alpha \in [0,1]$, also called learning factor.
-When $\alpha = 1$ we have the usual policy iteration as described in \Cref{ch:rl}. This update is not guaranteed to be safe in general. Kakade considered a conservative approach to safety by choosing $\alpha < 1$ and make smaller updates that guarantee an improvement.
+When $\alpha = 1$ we have the usual policy iteration as described in \Cref{ch:rl}. This update is not guaranteed to be safe in general. Kakade considered a conservative approach to safety by choosing $\alpha < 1$ and making smaller updates that guarantee an improvement.
 A first result achieved by Kakade is summarized in \Cref{th:kakade1}:
 \begin{theorem}[Adapted from Theorem 4.1, Kakade 2002]
 \label{th:kakade1}
@@ -56,16 +56,16 @@ is the policy advantage function and
 \end{equation}
 \end{theorem}
 
-This result can be analysed as follows: the first term is analogous to the first order expansion of the performance measure $J$ with respect to $\alpha$ and is related to the policy advantage function, while the second term is a penalization term that prevents taking large values of $\alpha$. These two terms are in contrast, thus posing a trade-off condition between the expected advantage given by the first term and the magnitude of the update that can harm monotonic improvements given by the second term. Given this result, an algorithm can be developed as follows:
+This result can be analysed as follows: the first term is analogous to the first order expansion of the performance measure $J$ with respect to $\alpha$ and is related to the policy advantage function, while the second term is a penalization term that prevents taking large values of $\alpha$. These two terms are in contrast, thus posing a trade-off condition between the expected advantage given by the first term and the magnitude of the update, that can harm monotonic improvements, given by the second term. Given this result, an algorithm can be developed as follows:
 
 \begin{theorem}[Adapted from Corollary 4.2, Kakade 2002]
-Let $R$ be the maximal possible reward. Using update rule \ref{eq:kakade-update}, if $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ the performance bound \ref{eq:kakade-improvement} is maximized by choosing:
+Let $R$ be the maximum possible reward. Using update rule \ref{eq:kakade-update}, if $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ the performance bound \ref{eq:kakade-improvement} is maximized by choosing:
 \begin{equation}
-\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu][\overline{\pi}]}{4R}
+\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu][\overline{\pi}]}{4R},
 \end{equation}
-thus guaranteeing a policy improvement of:
+guaranteeing a policy improvement of:
 \begin{equation}
-J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{{\poladv[\pi, \mu][\overline{\pi}]}^2}{8R}
+J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{{\poladv[\pi, \mu][\overline{\pi}]}^2}{8R}.
 \end{equation}
 \end{theorem}
 
@@ -89,25 +89,25 @@ It is also useful to report a notable and general result from Kakade, 2002 that 
 \begin{theorem}[Lemma 6.1 from Kakade 2002]\label{th:kakade-lemma6.1}
 For any policies $\tilde{\pi}$ and $\pi$ and any starting state distribution $\mu$,
 \begin{equation}
-J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}d_{\tilde{\pi}, \mu}]{A_{\pi}(s,a)} 
+J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}, d_{\tilde{\pi}, \mu}]{A_{\pi}(s,a)} 
 \end{equation} 
 \end{theorem}
 
 \section{Safe policy iteration}
 \label{sec:spi}
-The approach used by Kakade and Langford was really smart and influenced many later works in the last decade. The main contribution though was only theoretical, since the proposed algorithm (CPI) was found to be over-conservative, leading to a slow learning process due to the looseness of the bound. \\
-This problem was addressed by Pirotta et al. \cite{safe_iteration} that derived a tighter bound on policy improvement w.r.t. the one in CPI. They also proposed new algorithms that exploits this tighter bound and experimental results.
+The approach used by Kakade and Langford was really smart and influenced many later works in the last decade. The contribution, though, was mainly theoretical, since the proposed algorithm (CPI) was found to be over-conservative, leading to a slow learning process due to the looseness of the bound. \\
+This problem was addressed by Pirotta et al. \cite{safe_iteration} that derived a tighter bound on policy improvement w.r.t. the one in CPI. They also proposed new algorithms that exploit this tighter bound and provided experimental results.
 
 Before diving into the derivation of the bound on performance improvement, Pirotta et al. derived some bounds on the future state distribution $d_{\mu}^{\pi}$, that are reported here for their generality:
 
 \begin{theorem}[Adapted from Corollary 3.2 of \cite{safe_iteration}]
 Let $\pi$ and $\pi'$ be two stationary policies for an infinite horizon MDP $\mathcal{M}$. The $L_1$-norm of the difference between their $\gamma$-discounted future state distributions under starting state distribution $\mu$ can be upper bounded as follows:
 \begin{equation}
-\norm{d_{\mu}^{\pi'} - d_{\mu}^{\pi}} \leq \frac{\gamma}{(1-\gamma)^2}D_\infty^{\pi, \pi'}
+\norm{d_{\mu}^{\pi'} - d_{\mu}^{\pi}} \leq \frac{\gamma}{(1-\gamma)^2}D_\infty^{\pi, \pi'},
 \end{equation}
-Where:
+where:
 \begin{equation}
-D_\infty^{\pi, \pi'} = \sup_{s\in\sspace}\norm{\pi'(\cdot\mid s) - \pi(\cdot \mid s)}
+D_\infty^{\pi, \pi'} = \sup_{s\in\sspace}\norm{\pi'(\cdot\mid s) - \pi(\cdot \mid s)}.
 \end{equation}
 \end{theorem}
 
@@ -115,41 +115,41 @@ This is a (looser) model-free version of the bound from \cite{safe_iteration}, w
 The authors then used \Cref{th:kakade-lemma6.1} to develop a tighter bound on performance improvement:
 
 \begin{theorem}\label{th:pirotta-bound1}
-For any stationary policies $\pi$ and $pi'$ and any starting state distribution $\mu$, given any baseline policy $\pi_b$, the difference between the performance of $\pi'$ and the one of $\pi$ can be lower bounded as follows:
+For any stationary policies $\pi$ and $pi'$ and any starting state distribution $\mu$, given any baseline policy $\pi_b$, the difference between the performance of $\pi'$ and the one of $\pi$ can be lower bounded as follows\footnotemark:
 \begin{equation}
-J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\transpose{d_\mu^{\pi_b}}A_\pi^{\pi'}}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi_b, \pi'}} \frac{\Delta A_{\pi}^{\pi'}}{2}
+J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\transpose{d_\mu^{\pi_b}}A_\pi^{\pi'}}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi_b, \pi'}} \frac{\Delta A_{\pi}^{\pi'}}{2},
 \end{equation}
-Where
+where:
 \begin{equation}
-\Delta A_{\pi}^{\pi'} = \sup_{s, s'\in\sspace}\left|{A_\pi^{\pi'}(s) - A_\pi^{\pi'}(s')}\right|
+\Delta A_{\pi}^{\pi'} = \sup_{s, s'\in\sspace}\left|{A_\pi^{\pi'}(s) - A_\pi^{\pi'}(s')}\right|.
 \end{equation}
 \end{theorem}
-\begin{note}
+\footnotetext{
 In the original paper, Pirotta et al. uses the un-normalized state occupancy $d_{\mu}^{\pi} = \sum_{t=0}^{\infty}\gamma^t Pr(s_t = s \mid \pi, \mu)$ instead of the normalized future state distribution $d_{\mu}^{\pi} = (1-\gamma)\sum_{t=0}^{\infty}\gamma^t Pr(s_t = s \mid \pi, \mu)$ as in this work. This introduces a normalization factor $1-\gamma$ that has to be considered.
-\end{note}
+}
 
 This bound is similar to \Cref{eq:kakade-improvement}. The main difference is in the penalty term that here depends on two factors: the variation in the advantage function $\Delta A_\pi^{\pi'}$ and the distance between the two policies $\pi$ and $\pi'$ in infinite norm. Since approximating the advantage function may be difficult in some problems, the authors also provided a looser but simplified bound that requires the action-value function instead:
 
 \begin{theorem}
 \label{th:pirotta-bound2}
-For any stationary policies $\pi$ and $pi'$ and any starting state distribution $\mu$ the difference between the performance of $\pi'$ and the one of $\pi$ can be lower bounded as follows:
+For any stationary policies $\pi$ and $\pi'$ and any starting state distribution $\mu$, the difference between the performance of $\pi'$ and the one of $\pi$ can be lower-bounded as follows:
 \begin{equation}
-J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\poladv[\pi, \mu][\pi']}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi, \pi'}}^2 \frac{\norm[\infty]{Q^\pi}}{2}
+J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\poladv[\pi, \mu][\pi']}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi, \pi'}}^2 \frac{\norm[\infty]{Q^\pi}}{2},
 \end{equation}
-where $\norm[\infty]{Q^{\pi}}=\sup\limits_{\substack{s\in\sspace, a\in\aspace}}Q^{\pi}(s,a)$
+where $\norm[\infty]{Q^{\pi}}=\sup\limits_{\substack{s\in\sspace, a\in\aspace}}Q^{\pi}(s,a)$.
 \end{theorem}
 
-Pirotta et al. provided two algorithms that employ this bound for safe policy iteration. The first proposed algorithm is called Unique-parameter Safe Policy Improvement (USPI) that uses the update rule defined in \Cref{eq:kakade-update} with $\alpha\in [0,1]$ to update the current policy. In this settings, the following theorem holds:
+Pirotta et al. provided two algorithms that employ this bound for safe policy iteration. The first proposed algorithm is called Unique-parameter Safe Policy Improvement (USPI), that uses the update rule defined in \Cref{eq:kakade-update} with $\alpha\in [0,1]$ to update the current policy. In this setting, the following theorem holds:
 
 \begin{theorem}
 \label{th:pirotta-algo}
-If $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ then, using update rule \ref{eq:kakade-improvement} with $\alpha = \min(\, \alpha^*)$, $\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu][\overline{\pi}]}{\gamma D_\infty^{\pi, \pi'}\Delta A_\pi^{\pi'}}$ we have:
+If $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ then, using update rule \ref{eq:kakade-improvement} with $\alpha = \min(\, \alpha^*, 1)$, with $\alpha^* = \frac{(1-\gamma)\poladv[\pi, \mu][\overline{\pi}]}{\gamma D_\infty^{\pi, \pi'}\Delta A_\pi^{\pi'}}$ we have:
 \begin{itemize}
-\item $\alpha^* \leq 1$ the following policy improvement is guaranteed:
+\item $\alpha^* \leq 1$: the following policy improvement is guaranteed:
 \[
 J_\mu^{\pi'} - J_\mu^\pi \geq \frac{{\poladv[\pi, \mu][\pi']}^2}{2\gamma D_\infty^{\pi, \overline{\pi}}\Delta A_\pi^{\overline{\pi}}}
 \]
-\item $\alpha^* > 1$ we have a full update toward $\overline{\pi}$ and a guarantee of like specified in \Cref{th:pirotta-bound1} setting $\pi_b = \pi$:
+\item $\alpha^* > 1$: we have a full update toward $\overline{\pi}$ and the guarantee from \Cref{th:pirotta-bound1} setting $\pi_b = \pi$:
 \begin{equation}
 J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\poladv[\pi, \mu][\overline{\pi}]}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi, \pi'}} \frac{\Delta A_{\pi}^{\pi'}}{2}
 \end{equation}
@@ -162,13 +162,13 @@ The second algorithm proposed by Pirotta et al. is called Multiple-parameter Saf
 \[
 \pi'(a\mid s) = \alpha(s)\overline{\pi}(a\mid s) + (1-\alpha(s))\pi(a\mid s),\qquad\forall s,a
 \]
-Where $\alpha(s)\in [0,1] \forall s$ is a per-state convex combination coefficient. This more general variant proved to be only slightly better than USPI in some domain but it often happened that the policy improvement bound found by MSPI was smaller than the one of USPI, because the former, due to its increased complexity, optimizes the bound in \Cref{th:pirotta-bound2} while USPI can optimize the tighter bound in \Cref{th:pirotta-bound1}
+Where $\alpha(s)\in [0,1] \forall s$ is a per-state convex-combination coefficient. This more general variant proved to be only slightly better than USPI in some domain but it often happened that the policy improvement bound found by MSPI was lower than the one of USPI, because the former, due to its increased complexity, optimizes the bound in \Cref{th:pirotta-bound2}, while USPI can optimize the tighter bound in \Cref{th:pirotta-bound1}
 
 [TODO REPORT SOME RESULTS?]
 
-\section{Adaptive Step Size}
+\section{Adaptive Step Size For PG}
 \label{sec:ass}
-Pirotta et al.~\cite{adaptive_step} further developed their work on safe policy iteration and adapted the bound to be used with policy gradient methods.\\
+Pirotta et al.~\cite{adaptive_step} further developed their work on safe policy iteration and adapted the bound from~\cite{safe_iteration} and described in~\Cref{sec:spi} to be used with policy gradient methods.\\
 Their first contribution is a continuous version of the bound described in \Cref{th:pirotta-bound2}:
 
 \begin{theorem}[Continuous MDP version of Corollary 3.6 in \cite{safe_iteration}]
@@ -178,8 +178,8 @@ J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{1-\gamma}\int_{\sspace} d_\mu^{\p
 \]
 where $\norm[\infty]{Q^{\pi_{\vtheta}}}$ is the supremum norm of the Q-function: $\norm[\infty]{Q^{\pi_{\vtheta}}}=\sup\limits_{\substack{s\in\sspace, a\in\aspace}}Q^{\pi_{\vtheta}}(s,a)$
 \end{theorem}
-Here again we have two terms, the first related with the policy advantage function $\poladv[\pi_{\vtheta},\mu][\pi_{\vtheta'}]$ that encodes how much the target policy $\pi_{\vtheta'}$ performs better than $\pi_{\vtheta}$, while the second term is a penalty term driven by the distance between the two policies in infinite norm. \\
-Following this extension, they provided a new formulation for the difference between two policies that was used to build the following bound by fixing the update rule $\vtheta' = \vtheta + \alpha \gradj$:
+Here again we have two terms, the first related with the policy advantage function $\poladv[\pi_{\vtheta},\mu][\pi_{\vtheta'}]$, that encodes how much the target policy $\pi_{\vtheta'}$ performs better than $\pi_{\vtheta}$, while the second term is a penalty term driven by the distance between the two policies in infinite norm. \\
+Following this extension, they provided a new formulation for the difference between two policies that was used to build the following bound for the update rule $\vtheta' = \vtheta + \alpha \gradj$:
 
 \newcommand*{\pol}[1][]{\pi(a|s, \vtheta #1)}
 
@@ -197,13 +197,13 @@ Let the update of the policy parameters be $\vtheta'=\vtheta+\alpha\nabla_{\vthe
 where $\Delta\vtheta=\alpha\gradj$
 \end{theorem}
 
-The bound above is a forth order polynomial of the step size, whose stationary points can be expressed in close form. Using the Descartes' rule it can be proven the existence and uniqueness of a real positive value for the step size $\alpha$. \\
+The bound above is a fourth order polynomial of the step size, whose stationary points can be expressed in closed form. Using Descartes' rule we can prove the existence and uniqueness of a real positive value for the optimal step size $\alpha$ that maximizes the guaranteed performance improvement. \\
 This complex bound, although very general, can be simplified by adding an assumption on the policy class. Since we are considering continuous MDPs, it is reasonable to employ Gaussian policies of the following form:
 \[
-\pi(a|s,\vtheta)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left( -\frac{1}{2}\left( \frac{a-\transpose{\vtheta}\phi(s)}{\sigma} \right)^2 \right)
+\pi(a|s,\vtheta)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left( -\frac{1}{2}\left( \frac{a-\transpose{\vtheta}\phi(s)}{\sigma} \right)^2 \right),
 \]
 where the mean is a linear combination of a parameter vector $\vtheta$ of size $m$ and a state feature vector $\phi(\cdot)$.\\
-Moreover, the authors also assumed that features $\phi$ are uniformly bounded:
+Moreover, the authors assumed that features $\phi$ are uniformly bounded:
 \begin{equation}
 \label{eq:gauss-assumption}
 |\phi_i(s)|<M_\phi,\qquad\forall s \in \sspace, \forall i = 1,\ldots,m.
@@ -211,23 +211,23 @@ Moreover, the authors also assumed that features $\phi$ are uniformly bounded:
 With these assumptions, the above bound in~\Cref{th:pirotta-bound3} becomes a more handy second-order polynomial that can be easily employed in a practical algorithm:
 \begin{theorem}[Corollary 5.1 from \cite{adaptive_step}]
 \label{th:adaptive-gauss-bound}
-For any starting state distribution $\mu$, and any pair of stationary Gaussian policies $\pi_{\vtheta}\sim\mathcal{N}(\transpose{\vtheta}\phi(s), \sigma^2)$ and $\pi_{\vtheta '}\sim\mathcal{N}(\transpose{\vtheta'}\phi(s), \sigma^2)$, so that $\vtheta' = \vtheta + \alpha\gradj$ and under assumption~\ref{eq:gauss-assumption}, the difference between the performance of $\pi_{\vtheta'}$ and the one of $\pi_{\vtheta}$ can be lower bounded as follows:
+For any starting state distribution $\mu$, and any pair of stationary Gaussian policies $\pi_{\vtheta}\sim\mathcal{N}(\transpose{\vtheta}\phi(s), \sigma^2)$ and $\pi_{\vtheta '}\sim\mathcal{N}(\transpose{\vtheta'}\phi(s), \sigma^2)$, so that $\vtheta' = \vtheta + \alpha\gradj$, under assumption~\ref{eq:gauss-assumption}, the difference between the performance of $\pi_{\vtheta'}$ and the one of $\pi_{\vtheta}$ can be lower bounded as follows:
 \begin{align*}
 J_\mu(\vtheta') - J_\mu(\vtheta) &\geq \alpha\norm[2]{\gradj}^2- \alpha^2\frac{RM_\phi^2\norm[1]{\gradj}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\aspace|}{\sqrt{2\pi}\sigma}+\frac{\gamma}{2(1-\gamma)}\right)
 \end{align*}
 Where $R$ is the maximum absolute reward and $|\aspace|$ is the volume of the action space. 
 \end{theorem}
 
-This simplified bound has a single maximum attained for some positive value of $\alpha$. The following statement will provide a policy gradient algorithm with adaptive step size:
+This simplified bound has a single maximum attained for some positive value of $\alpha$. The following statement can be used to design a policy gradient algorithm with adaptive step size:
 \begin{corollary}
 \label{th:simplified-gauss-bound}
 The performance lower bound provided in \Cref{th:adaptive-gauss-bound} is maximized by choosing the following step size:
 \footnotesize
 \[
-\alpha^* = \frac{(1-\gamma)^3\sqrt{2\pi}\sigma^3\norm[2]{\gradj}^2}{(\gamma\sqrt{2\pi}\sigma +2(1-\gamma)|\aspace|)RM_\phi^2\norm[1]{\gradj}^2}
+\alpha^* = \frac{(1-\gamma)^3\sqrt{2\pi}\sigma^3\norm[2]{\gradj}^2}{(\gamma\sqrt{2\pi}\sigma +2(1-\gamma)|\aspace|)RM_\phi^2\norm[1]{\gradj}^2},
 \]
 \normalsize
-That guarantees the following policy performance improvement
+that guarantees the following policy performance improvement
 \[
 J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{2}\alpha^* \norm[2]{\gradj}^2
 \]
@@ -238,71 +238,69 @@ J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{2}\alpha^* \norm[2]{\gradj}^2
 \newcommand{\upgradj}{\overline{\hat{\nabla}J_\mu}(\vtheta)}
 \newcommand{\botgradj}{\underline{\hat{\nabla}J_\mu}(\vtheta)}
 \subsection{Approximate framework}
-The simplified bound in \Cref{th:adaptive-gauss-bound} depends on some constants and on the policy gradient $\gradj$. In a model-free control problem, we cannot compute directly the policy gradient, hence it has to be estimated from experience samples. This approximation of the policy gradient introduces some noise that can potentially harm the safety of the algorithm.\\
-To address this issue, we consider the policy gradient to be a random variable $\estgradj$ that has a bounded error $\epsilon$ with respect to the true value $\gradj$ so that, with probability at least $1-\delta$ we have:
+The simplified bound in \Cref{th:adaptive-gauss-bound} depends on some constants and on the policy gradient $\gradj$. In a model-free control problem, we cannot compute the policy gradient directly, hence it has to be estimated from experience samples. This approximation of the policy gradient introduces some noise that can potentially harm the safety of the algorithm.\\
+To address this issue, Papini et al. considered the policy gradient to be a random variable $\estgradj$ that has a bounded error $\epsilon$ with respect to the true value $\gradj$ so that, with probability at least $1-\delta$ we have:
 \[
 \mathbb{P}\left(\left|\gradj - \estgradj\right|\geq\epsilon\right)\leq\delta
 \]
 Given this formalization of the policy gradient estimate, we can guarantee a performance improvement bound in high probability:
 \begin{theorem}[Theorem 5.2 from \cite{adaptive_step}]
-Under the same assumptions of~\Cref{th:adaptive-gauss-bound} and provided that it is available a gradient estimate $\estgradj$ so that $\mathbb{P}\left(\left|\gradj - \estgradj\right|\geq\epsilon\right)\leq\delta$, the difference between the performance of $\pi_{\vtheta'}$ and the one of $\pi_{\vtheta}$ can be lower bounded at least with probability $(1-\delta)^m$:
+Under the same assumptions of~\Cref{th:adaptive-gauss-bound} and provided that a gradient estimate $\estgradj$ is available so that $\mathbb{P}\left(\left|\gradj - \estgradj\right|\geq\epsilon\right)\leq\delta$, the difference between the performance of $\pi_{\vtheta'}$ and the one of $\pi_{\vtheta}$ can be lower bounded with probability at least $(1-\delta)^m$ as follows:
 \[
-J_\mu(\vtheta') - J_\mu(\vtheta) \geq \alpha\norm[2]{\botgradj}^2 - \alpha^2\frac{RM_\phi^2\norm[1]{\upgradj}^2}{(1-\gamma)^2\sigma^2}\left( \frac{|\aspace|}{\sqrt{2\pi}\sigma} + \frac{\gamma}{2(1-\gamma)} \right)
+J_\mu(\vtheta') - J_\mu(\vtheta) \geq \alpha\norm[2]{\botgradj}^2 - \alpha^2\frac{RM_\phi^2\norm[1]{\upgradj}^2}{(1-\gamma)^2\sigma^2}\left( \frac{|\aspace|}{\sqrt{2\pi}\sigma} + \frac{\gamma}{2(1-\gamma)} \right),
 \]
-Where $\botgradj=\max(|\estgradj|-\epsilon, 0)$ and $\upgradj=|\estgradj|+\epsilon$.\\
+where $\botgradj=\max(|\estgradj|-\epsilon, 0)$ and $\upgradj=|\estgradj|+\epsilon$.\\
 This bound is maximized by the following step size:
 \[
-\alpha^* = \frac{(1-\gamma)^3\sqrt{2\pi}\sigma^3\norm[2]{\botgradj}^2}{(\gamma\sqrt{2\pi}\sigma +2(1-\gamma)|\aspace|)RM_\phi^2\norm[1]{\upgradj}^2}
+\alpha^* = \frac{(1-\gamma)^3\sqrt{2\pi}\sigma^3\norm[2]{\botgradj}^2}{(\gamma\sqrt{2\pi}\sigma +2(1-\gamma)|\aspace|)RM_\phi^2\norm[1]{\upgradj}^2}.
 \]
 \end{theorem}
 
-The above bound holds in high probability when the estimate of the policy gradient $\estgradj$ is computed from a number of trajectories that is large enough. The batch size that is required to guarantee such constraint depends on the method used to estimate the gradient and the concentration bound used.\\
-The authors used the Chebyshev's inequality to provide a high-probability upper bound to the gradient approximation error for the REINFORCE estimator and for G(PO)MDP/PGT estimator, leading to the following result:
+The above bound holds in high probability when the estimate of the policy gradient $\estgradj$ is computed from a number of trajectories that is large enough. The batch size that is required to guarantee such constraint depends on the method used to estimate the gradient and the concentration bound used, to model $\epsilon$.\\
+The authors used the Chebyshev's inequality to provide a high-probability upper bound to the gradient approximation error for the REINFORCE estimator and for the G(PO)MDP/PGT estimator, leading to the following result:
 \begin{corollary}[Adapted from Theorem 5.4 and 5.6 from \cite{adaptive_step}]
-The number of H-step trajectories required to guarantee with probability at least $(1-\delta)$ that 
+The number of H-step trajectories required to guarantee, with probability at least $(1-\delta)$, that 
 \[
 \left| \estgradj - \gradj \right|\leq \epsilon
 \]
 is:
 \begin{itemize}
-\item REINFORCE: $N=\frac{R^2M_\phi^2 H(\-\gamma^H)^2}{\delta\epsilon^2\sigma^2(1-\delta)^2}$
-\item G(PO)MDP/PGT: $N=\frac{R^2M_\phi^2}{\delta\epsilon^2\sigma^2(1-\gamma)^2}\left[ \frac{1-\gamma^{2H}}{1-\gamma^2} + H\gamma^{2H} - 2 \gamma^H\frac{1-\gamma^H}{1-\gamma} \right]$
+\item REINFORCE: $N=\frac{R^2M_\phi^2 H(\-\gamma^H)^2}{\delta\epsilon^2\sigma^2(1-\delta)^2}$,
+\item G(PO)MDP/PGT: $N=\frac{R^2M_\phi^2}{\delta\epsilon^2\sigma^2(1-\gamma)^2}\left[ \frac{1-\gamma^{2H}}{1-\gamma^2} + H\gamma^{2H} - 2 \gamma^H\frac{1-\gamma^H}{1-\gamma} \right]$.
 \end{itemize}
 \end{corollary}
 
 
 \section{Adaptive Batch Size}
 \label{sec:abs}
-Pirotta et al. showed that a safe policy gradient algorithm can be developed by carefully choosing the step size $\alpha$ that maximizes a bound on performance improvement. However in the approximate framework we have seen that the policy gradient has to be estimated and is thus subjected to high variance. This problem weighs on the choice of the batch size $N$. Using some general (but very loose) concentration bound such as Chebyshev's inequality, Pirotta et al. provided an estimate for the batch size to use. However, the magnitude of this estimate is too conservative as it would require a number of trajectory samples that is prohibitive in most cases\\
-Papini et al. \cite{adaptive_batch} addressed this problem by adapting the number of samples required to guarantee a high probability performance improvement based on the current statistics of the policy gradient estimates $\estgradj$. This approach is very innovative since the batch size in the literature is usually hand-tuned to obtain the best performance in each domain. Their first contribution is an extension of the bound in \Cref{th:adaptive-gauss-bound} for the general case where the step size is non-scalar: $\vtheta' = \vtheta + \Lambda \gradj,\, \Lambda=diag(\alpha_1, \alpha_2,\ldots,\alpha_m)$. Under the same assumption stated in \Cref{eq:gauss-assumption} they produced the following result:
+Pirotta et al. showed that a safe policy gradient algorithm can be developed by carefully choosing the step size $\alpha$ that maximizes a bound on performance improvement. However, in the approximate framework we have seen that the policy gradient has to be estimated and is thus subjected to possibly high variance. This problem weighs on the choice of the batch size $N$. Using some general (but very loose) concentration bound such as Chebyshev's inequality, Pirotta et al~\cite{adaptive_step}. provided an estimate for the batch size to use. However, the magnitude of this estimate is too conservative as it would require a number of trajectory samples that is prohibitive in most cases\\
+Papini et al. \cite{adaptive_batch} addressed this problem by adapting the number of samples required to guarantee a high probability performance improvement based on the current statistics of the policy gradient estimate $\estgradj$. This approach is very innovative since the batch size, in the literature, is usually hand-tuned to obtain the best performance in each domain. Their first contribution is an extension of the bound in \Cref{th:adaptive-gauss-bound} for the general case where the step size is non-scalar: $\vtheta' = \vtheta + \Lambda \gradj,\, \Lambda=diag(\alpha_1, \alpha_2,\ldots,\alpha_m)$. Under the same assumption stated in \Cref{eq:gauss-assumption}, they produced the following result:
 \begin{theorem}
-For any initial state distribution $\mu$ and any pair of stationary Gaussian policies $\pi_{\vtheta}\sim\mathcal{N}(\transpose{\vtheta}\phi(s),\sigma^2)$ and $\pi_{\vtheta'}\sim\mathcal{N}(\transpose{\vtheta'}\phi(s),\sigma^2)$ so that $\vtheta' = \vtheta + \Lambda\gradj$ the difference between the performance of $\pi_{\vtheta'}$ and the one of $\pi_{\vtheta}$ can be lower bounded as follows:
+For any initial state distribution $\mu$ and any pair of stationary Gaussian policies $\pi_{\vtheta}\sim\mathcal{N}(\transpose{\vtheta}\phi(s),\sigma^2)$ and $\pi_{\vtheta'}\sim\mathcal{N}(\transpose{\vtheta'}\phi(s),\sigma^2)$ so that $\vtheta' = \vtheta + \Lambda\gradj$, the difference between the performance of $\pi_{\vtheta'}$ and the one of $\pi_{\vtheta}$ can be lower bounded as follows:
 \[
-J_\mu(\vtheta') - J_\mu(\vtheta) \geq \transpose(\gradj)\Lambda\gradj - c\norm[1]{\Lambda\gradj}^2
+J_\mu(\vtheta') - J_\mu(\vtheta) \geq \transpose{\gradj}\Lambda\gradj - c\norm[1]{\Lambda\gradj}^2,
 \]
 where $c=\frac{RM_\phi^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\aspace|}{\sqrt{2\pi}\sigma} + \frac{\gamma}{2(1-\gamma)}\right)$.\\
 This lower bound is maximized by the following non-scalar step size:
 \[
-\alpha_k^* = \begin{cases} \frac{1}{2c} & \textrm{if }k=\min\{\arg\max_i|\nabla_{\theta_i} J_\mu(\vtheta)|\} \\ 0 & \textrm{otherwise}\end{cases}
+\alpha_k^* = \begin{cases} \frac{1}{2c} & \textrm{if }k=\min\{\arg\max_i|\nabla_{\theta_i} J_\mu(\vtheta)|\}, \\ 0 & \textrm{otherwise}.\end{cases}
 \]
 \end{theorem}
 
 Upon this result, Papini et al. introduced a cost-sensitive performance improvement measure $\Upsilon_\delta(\Lambda, N) = \frac{B_\delta(\Lambda, N)}{N}$ that relates the high-probability lower bound on performance improvement $B_\delta(\Lambda, N)$ with the batch size $N$, as done in~\cite{DBLP:journals/corr/abs-1712-03428}. The idea is to maximize the performance improvement per sample trajectory. This poses an interesting trade-off, since larger batch sizes lead to more accurate policy updates but this gain is spread across the multiple trajectories, while smaller batch sizes can also worsen the performance due to the high variance of the policy gradient.\\
-Interestingly enough, the joint optimization of the step size and the batch size lead to a coordinate descent optimization, where only one component (the one associated with the largest absolute policy gradient estimate) of the parameter gets updated. Moreover, the resulting step size becomes a constant and the main role is played solely by the adaptive batch size.\\
-
-[AGGIUNGERE FORMULA PER BATCH SIZE? AGGIUNGERE RISULTATI?]
+Interestingly enough, the joint optimization of the step size and the batch size lead to a coordinate descent algorithm, where only one component (the one associated with the largest absolute-value policy gradient estimate) of the policy parameter gets updated. This algorithm is proven to converge as shown in~\cite{nutinicoordinate}. Moreover, the resulting step size becomes a constant and the main role is played solely by the adaptive batch size.
 
 \section{Trust Region Policy Optimization}
 \label{sec:trpo}
-Following the results of Kakade \& Langford, Shulman et al.~\cite{trpo} address the problem of safe algorithms to be too conservative. In fact, it is really hard to develop a tight bound on policy performance improvement since there are several stochastic factors coming into play and the variance of the gradient estimates can be very high.\\
-As shown in \Cref{sec:abs}, a possibility could be to adapt the step size and the batch size to guarantee safe updates while maintaining the cost per trajectory as low as possible. However this does not fully overcome the conservativeness of such approaches, because, as we have seen in ~\Cref{sec:ass}, the practical bound from \Cref{th:adaptive-gauss-bound} originates from a series of simplifications and upper bounds on hard-to-estimate quantities, such as the infinite norm of the action-value function $\norm[\infty]{Q^{\pi_{\vtheta}}}$.
+Following the results of Kakade \& Langford, Shulman et al.~\cite{trpo} address the problem of safe algorithms going too conservative. In fact, it is really hard to develop a tight bound on policy performance improvement since there are several stochastic factors coming into play and the variance of the gradient estimates can be very high.\\
+As shown in \Cref{sec:abs}, a possibility is to adapt the step size and the batch size to guarantee safe updates while maintaining the cost per trajectory as low as possible. However this does not fully overcome the conservativeness of such approaches, because, as we have seen in ~\Cref{sec:ass}, the practical bound from \Cref{th:adaptive-gauss-bound} originates from a series of simplifications and upper bounds on hard-to-estimate quantities, such as the infinite norm of the action-value function $\norm[\infty]{Q^{\pi_{\vtheta}}}$.
 
-Shulman et al. try to overcome this issue starting from the results of Kakade \& Langford and proposing a new algorithm called Trust Region Policy Optimization (TRPO). This new algorithm is intended to give monotonic performance improvements and can be used on large tasks such as Atari games, at the cost of some hyper-parameter tuning. However, the practical version of the algorithm proposed by Shulman et al. suffer from several approximations that make it lose some safety properties.\\
-The derivation of the bound starts from this insight proven in~\cite{natural}:
+Shulman et al. try to overcome this issue starting from the results of Kakade \& Langford and proposing a new algorithm called Trust Region Policy Optimization (TRPO). This new algorithm is intended to give monotonic performance improvements and can be used on large tasks such as Atari games, at the cost of some hyper-parameter tuning. However, the practical version of the algorithm proposed by Shulman et al. suffer from several approximations that make it lose most safety properties.\\
+The derivation of the bound starts from the following insight, proven in~\cite{natural}:
 \begin{lemma}
 For any pair of policies $\pi$ and $\tilde{\pi}$, the performance of $\tilde{\pi}$ can be written as a function of the advantage $A_\pi$:
 \begin{align*}
-J(\tilde{\pi}) &= J(\pi) + \EV[s_0, a_0, \ldots,\sim\tilde{\pi}]{\sum_{t=0}^{\infty}\gamma^t A_\pi(s_t,a_t)} \\&= J(\pi) + \frac{1}{1-\gamma}\sum_s d_{\mu}^{\tilde{\pi}}(s)\sum_a \tilde{\pi}(a|s)A_\pi(s,a)
+J_\mu(\tilde{\pi}) &= J_\mu(\pi) + \EV[s_0, a_0, \ldots,\sim\tilde{\pi}]{\sum_{t=0}^{\infty}\gamma^t A_\pi(s_t,a_t)} \\&= J_\mu(\pi) + \frac{1}{1-\gamma}\sum_s d_{\mu}^{\tilde{\pi}}(s)\sum_a \tilde{\pi}(a|s)A_\pi(s,a)
 \end{align*}
 \end{lemma}
 
@@ -311,12 +309,12 @@ A first approximation done by the authors is to remove the dependency from the f
 \label{eq:trpo-first-approx}
 d_\mu^{\tilde{\pi}}\sim d_\mu^{\pi}
 \end{equation}
-Next, we define the quantity $L_\pi$ the local approximation of the policy performance $J(\pi)$:
+Next, they defined the quantity $L_\pi$, a local approximation of the policy performance $J(\pi)$:
 \[
 L_\pi(\tilde{\pi}) = J(\pi) + \frac{1}{1-\gamma}\sum_s d_\mu^{\pi}(s) \sum_a \tilde{\pi}(a|s) A_\pi(s,a)
 \]
 \begin{note}
-When the policy $\pi$ is a parameterized by $\theta$ and is differentiable, with the approximation in ~\Cref{eq:trpo-first-approx} we still have that $L_{\pi_{\theta_0}}$ is a first order approximation of the performance $J(\pi_{\theta_0})$ evaluated in $\theta_0$
+When the policy $\pi$ is a parameterized by $\theta$ and is differentiable, with the approximation from~\Cref{eq:trpo-first-approx}, we still have that $L_{\pi_{\theta_0}}$ is a first-order approximation of the performance $J(\pi_{\theta_0})$ evaluated in $\theta_0$
 \end{note}
 
 In this setting, the authors derived the following result:
@@ -324,9 +322,9 @@ In this setting, the authors derived the following result:
 \label{th:trpo-main}
 Let $D_{KL}^{\max}(\pi, \tilde{\pi}) = \max_s D_{KL}(\pi(\cdot|s) \parallel \tilde{\pi}(\cdot|s))$ be the maximum Kullback-Lieber divergence between two policies $\pi$ and $\tilde{\pi}$. Then, the following bound holds:
 \[
-J(\tilde{\pi})\geq L_\pi(\tilde{\pi})-CD_{KL}^{\max}(\pi, \tilde{\pi})
+J(\tilde{\pi})\geq L_\pi(\tilde{\pi})-CD_{KL}^{\max}(\pi, \tilde{\pi}),
 \]
-where $C = \frac{4\epsilon\gamma}{(1-\gamma)^2}$ and $\epsilon = \max_{s,a}|A_\pi (s,a)|$
+where $C = \frac{4\epsilon\gamma}{(1-\gamma)^2}$ and $\epsilon = \max_{s,a}|A_\pi (s,a)|$.
 \end{theorem}
 
 \begin{algorithm}[!t]
@@ -346,30 +344,29 @@ decreasing expected return $J$}
 \end{algorithm}
 
 Note that this result is similar (and slightly weaker) to the result from Kakade shown in \Cref{th:kakade1}. There are again two terms, the first related to the advantage of policy $\tilde{\pi}$ with respect to $\pi$ and the second term is a penalization given by the Kullback-Lieber divergence between the two policies.\\
-A proposed policy iteration algorithm can be obtained by observing that:
+A policy iteration algorithm can be obtained by observing that:
 \[
 J(\pi_{i+1}) - J(\pi) \geq M_i(\pi_{i+1}) - M_i(\pi_i)
 \]
 where $M_i(\pi) = L_{\pi_i} - CD_{KL}^{\max}(\pi_i, \pi)$.
 
-\Cref{alg:trpo-iteration} shows a proposed implementation of a policy iteration algorithm that uses the new bounds defined in \Cref{th:trpo-main}. However, this algorithm is not practical to use in real scenarios, as it requires to know some quantities such as $D_{KL}^{\max}$ that is difficult to approximate. Moreover, this algorithm would yield very small step sizes, nullifying the main objective of this work. Hence, starting from this general algorithm, the authors proposed a more practical version that comes with several approximations listed below:
+\Cref{alg:trpo-iteration} shows a proposed implementation of a policy iteration algorithm that uses the new bounds defined in \Cref{th:trpo-main}. However, this algorithm is not practical to use in real scenarios, as it requires to know some quantities such as $D_{KL}^{\max}$ that is difficult to approximate. Moreover, this algorithm would yield very small step sizes, nullifying the main objective of this work. Hence, starting from this general algorithm, the authors proposed a more practical version that comes with several approximations, listed below:
 \begin{itemize}
-\item First of all, they started considering parameterized policies $\pi_{\vtheta}$.
+\item First of all, they considered parameterized policies $\pi_{\vtheta}$.
 \item Instead of maintaining a penalty cost on the KL divergence in the objective function, they changed the problem formulation by maximizing the advantage and putting the KL divergence between the two policies as a constraint. In this way the problem becomes a constrained optimization problem on the policy parameters $\vtheta$.
 \item They replaced the maximum of the KL divergence with the average KL divergence, which is easier to estimate.
 \item They provided approximation techniques to estimate the objective and the constraint from experience samples.
 \end{itemize}
 
-The above approximations lead to an algorithm that is very effective in practice, yielding very good results even in complex domain such as Atari games. However, it is also proven to be very sensitive to noise and require hyper-parameter tuning to be effective, overall suffering from high variance in performance measure~\cite{2017arXiv170804133I}.
+The above approximations lead to an algorithm that is very effective in practice, yielding very good results even in complex domain such as Atari games. However, it is also proven to be very sensitive to noise and require hyper-parameter tuning to be effective, suffering from high variance in performance measure overall~\cite{2017arXiv170804133I}.
 
 \section{Alternative Safety Approaches}
 \label{sec:other-safe}
-All the methods considered so far try to achieve monotonic improvements. Following~\Cref{def:safety}, monotonic improvement is a special case where the reference performance is equal to the performance of the policy at the previous iteration. This constraint is not mandatory, since a policy can be still considered safe with respect to some other reference $\underline{J_\mu}$. This can be seen as a looser constraint than monotonic improvement, but nonetheless it is less interesting: in fact, this looser constraint allows for more exploration, thus yielding more promising results. 
+All the methods considered so far try to achieve monotonic improvement. Following~\Cref{def:safety}, monotonic improvement is a special case of safety constraint where the reference performance is equal to the performance of the policy at the previous iteration. This constraint is not always mandatory in practice. In many applications, for example, we can allow for some non-monotonic updates as long as the policy does not perform worse than a given reference (\eg the performance of the initial policy). In this case we can set a lower-bound on the performance $\underline{J_\mu}$ to be equal to the performance a user-defined policy. This looser constraint allows for more exploration, thus yielding more promising results. 
 
-This is the line of research followed by Thomas et al.~\cite{pmlr-v37-thomas15}, who provided an algorithm that, given some user-defined policy performance $\underline{J_\mu}$ and a factor $\delta$, it yields a policy $\pi_{new}$ whose performance $J_\mu(\pi_{new})$ is no worse than $\underline{J_\mu}$ with probability $1-\delta$.\\
+This is the line of research followed by Thomas et al.~\cite{pmlr-v37-thomas15}, who provided an algorithm that, given some user-defined policy performance $\underline{J_\mu}$ and a factor $\delta$, yields a policy $\pi_{new}$ whose performance $J_\mu(\pi_{new})$ is no worse than $\underline{J_\mu}$ with probability $1-\delta$.\\
 The proposed batched RL algorithm splits the sample trajectories in a train and a test set. The new policy $\pi_{new}$ is searched using the train set among the policies considered safe, while the test set is used to evaluate the quality of the new policy using offline policy evaluation with importance sampling \cite{Precup:2000:ETO:645529.658134}. 
 
 Ghavamzadeh et al.~\cite{Petrik:2016:SPI:3157096.3157354} presented a different approach to safe policy improvement. They considered a model-based approach, where a model of the MDP is built upon samples collected from experience. In order to model the uncertainty of the environment dynamics, the authors considered a robust regret minimization problem, where the new proposed policy $pi_{new}$ is robustly evaluated (i.e. by adding noise) against the approximated model to minimize the negative regret w.r.t. a baseline policy. 
 
-[TODO COHEN?]
-[TODO ALTRI APPROCCI SAFE?]
+In this chapter we have seen some approaches to safe learning. Monotonic improvements described in Sections~\ref{sec:cpi}-\ref{sec:trpo} often suffer to be too conservative, that's why the looser constraints described in this section are taken into considerations. However these latter approaches are not applied to policy gradient method, which offers nice theoretical properties. The focus of this work is to extend the results seen in \Cref{sec:ass} in policy gradient to non-monotonic safety constraints. This was done by first introducing a general framework for safe learning and then developing new theoretical results, as described in details in \Cref{ch:balance}

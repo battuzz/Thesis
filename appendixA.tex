@@ -1,5 +1,214 @@
-\chapter{Documentazione del progetto}
-\label{appendiceA}
+\chapter{Proofs}
+\label{app:proofs}
 \thispagestyle{empty}
 
-\noindent Documentazione del progetto logico dove si documenta il progetto logico del sistema e se \`e il caso si mostra la progettazione in grande del SW e dell'HW. Quest'appendice mostra l'architettura logica implementativa (nella Sezione 4 c'era la descrizione, qui ci vanno gli schemi a blocchi e i diagrammi).
+
+
+In this section we provide formal proofs of all the formal statements made in the paper.
+
+\nonnegativebudget*
+\begin{proof}
+	By telescoping the sum in the definition of budget:
+	\begin{align*}
+	B^t &= \sum_{k=0}^t J(\vtheta^t) - J(\vtheta^{t-1}) + J(\vtheta_{target}^t) - J(\vtheta_{target}^{t-1}) 
+	=\\&= J(\vtheta^t) - J(\vtheta^0) + J_{target}(\vtheta^t) - J_{target}(\vtheta^0).
+	\end{align*}
+	By rearranging terms, $B^t \geq 0$ implies:
+	\begin{equation*}
+	J(\vtheta^t)  + J_{target}(\vtheta^t)  \geq J(\vtheta^0) + J_{target}(\vtheta^0).
+	\end{equation*}
+\end{proof}
+
+\safetheta*
+\begin{proof}
+The first statement (\ref{stat:1_1}) is adapted from Theorem 3.3 in \cite{adaptive_batch} by setting $\vtheta = \vv$ and:
+\[
+	\Lambda_{kk} = \alpha \quad\text{if}\quad  k=\argmax_i |\gradJ[\vv_i]{\vv}|
+	\quad \text{else} \quad 0.
+\]
+The second statement (\ref{stat:1_2}) is exactly Corollary 3.4 from \cite{adaptive_batch}.
+The third statement (\ref{stat:1_3}) derives from (\ref{stat:1_1}) by requiring:
+\[
+	\alpha\norm[\infty]{\gradJ[\vv]{\vv^t}}^2 - 
+	\alpha^2 c \norm[\infty]{\gradJ[\vv]{\vv^t}}^2 \geq C,
+\]
+and solving the inequality for $\alpha$. Note that there is no real solution for $C>C_{\text{max}}^{\vv}$.
+\end{proof}
+
+Before proving Theorem \ref{th:safesigma}, we need the following lemmas:
+\begin{restatable}[]{lemma}{lemmaone}\label{lem:1}
+The second derivative \wrt the standard-deviation parameter $w$ of a policy parametrized as in Equation (\ref{eq:parametrization}) is bounded as follows:
+\[
+	\left|\frac{\partial^2\pi_{\vtheta}(a\vert s)}{\partial w^2}\right|
+	\leq \frac{\psi}{\sigma_w},
+\]
+where $\psi = \frac{4(\sqrt{7} - 2)e^{\frac{\sqrt{7}}{2} - 2}}{\sqrt{2\pi}}$.
+\end{restatable}
+\begin{proof}
+Let $\chi = \left(\frac{a - \mu_{\vv}}{\sigma_w}\right)^2$. 
+A first useful fact is: 
+\begin{align}\label{eq:a_1_1}
+	\frac{\partial\chi}{\partial w} = (a-\mu_{\vv})^2 \frac{\partial\chi}{\partial w}e^{-2w} = -2\chi.
+\end{align}
+Writing the policy as:
+\[
+\policy = \frac{1}{\sqrt{2\pi}\sigma_w}e^{-\nicefrac{\chi}{2}},
+\]
+derivatives \wrt $w$ can be easily computed as:
+\begin{align}
+&\frac{\partial \policy}{\partial w} = -\policy + \policy(-\frac{1}{2})(-2\chi) = (\chi-1)\policy,\\
+&\frac{\partial^2 \policy}{\partial w^2} = -2\chi\policy + (\chi-1)(\chi-1)\policy = (\chi^2-4\chi+1)\policy. 
+\end{align}
+Next, we study the continuous function:
+\[
+	f(\chi) \coloneqq (\chi^2-4\chi+1)e^{-\frac{\chi}{2}} = \sqrt{2\pi}\sigma_w\frac{\partial^2 \policy}{\partial w^2},
+\]
+constrained, of course, to $\chi\geq0$. We find that $f(\chi)$ has two stationary points:
+\begin{itemize}
+	\item  $\chi_1 = 4+\sqrt{7}$, with $f(\chi_1) = 4(\sqrt{7}+2)e^{-\frac{\sqrt{7}}{2}-2}\simeq 0.67$;
+	\item $\chi_2 = 4-\sqrt{7}$, with $f(\chi_2) = -4(\sqrt{7}-2)e^{\frac{\sqrt{7}}{2}-2}\simeq -1.31$, which is also the global minimum.
+\end{itemize}
+Moreover, $f(0) = 1$ and $f(\chi)\to 0$ as $\chi\to+\infty$, so $\chi_0 = 0$ is the global maximum in the region of interest.
+We can then state that $|f(\chi)|\leq |f(\chi_2)| = 4(\sqrt{7}-2)e^{\frac{\sqrt{7}}{2}-2}$, the maximum absolute value that $f(\chi)$ takes in $[0,+\infty]$. Finally:
+\[
+	\left|\frac{\partial^2 \policy}{\partial w^2}\right| = \frac{|f(\chi)|}{\sqrt{2\pi}\sigma_w}
+	\leq \frac{4(\sqrt{7}-2)e^{\frac{\sqrt{7}}{2}-2}}{\sqrt{2\pi}\sigma_w} \coloneqq \frac{\psi}{\sigma_w}.
+\]
+\end{proof}
+
+\begin{restatable}[]{lemma}{lemmatwo}\label{lem:2}
+Let $w' = w + \Delta w$. Then, the difference of the corresponding policies can be bounded as follows:
+\[
+	\pi_{\vv,w'}(a\vert s) - \pi_{\vv,w}(a\vert s) \geq \nabla_w \policy \Delta w - \frac{\psi\Delta w^2}{2\sigma_w}, 
+\]
+where $\psi$ is defined as in Lemma \ref{lem:1}.
+\end{restatable}
+\begin{proof}
+The Taylor expansion of $\pi_{\vv,w'}$ is:
+\begin{align}\label{eq:a_2_1}
+	\pi_{\vv,w'}(a\vert s) = \pi_{\vv,w}(a\vert s) + \nabla_w \policy\Delta w + R_1(\Delta w),
+\end{align}
+where $R_1(\Delta w)$ is the remainder of the series, given by:
+\[
+	R_1(\Delta w) = \frac{\partial^2\policy}{\partial w^2}\biggr\rvert_{w + \epsilon\Delta{w}}\frac{\Delta w^2}{2} \qquad \text{for some $\epsilon\in(0,1)$}.
+\]
+We can bound the remainder using Lemma \ref{lem:1}:
+\begin{align}\label{eq:a_2_2}
+	R_1(\Delta w) \geq  - \sup_{\epsilon}\left|\frac{\partial^2 \policy}{\partial w^2}\biggr\rvert_{w + \epsilon\Delta{w}}\frac{\Delta w^2}{2}\right| \geq -\frac{\psi\Delta w^2}{2\sigma_w},	
+\end{align}
+where the last inequality is from Lemma \ref{lem:1}. The lemma follows from (\ref{eq:a_2_1}) and (\ref{eq:a_2_2}) by rearranging terms.
+\end{proof}
+
+
+\begin{restatable}[]{lemma}{lemmathree}\label{lem:3}
+Let $w' = w + \Delta w$. Then, by neglecting $o(\Delta w^3)$ terms, the squared Chebyshev distance among the corresponding policies can be bounded as follows:
+\[
+	\norm[\infty]{\pi_{\vv,w'} - \pi_{\vv,w}}^2 \leq 2\Delta w^2.
+\]
+\end{restatable}
+\begin{proof}
+We have that:
+\begin{align}
+	&\norm[\infty]{\pi_{\vv,w'} - \pi_{\vv,w}}^2 
+	\leq \sup_{s\in\Sspace}\norm[1]{\pi_{\vv,w'}(\cdot\vert s) - \pi_{\vv,w}(\cdot\vert s)}^2 \nonumber\\
+	&\leq \sup_{s\in\Sspace}\left(2H(\pi_{\vv,w'}(\cdot\vert s) \| \pi_{\vv,w}(\cdot\vert s))\right)\label{eq:a_3_1}\\
+	&=2\left(\log\frac{\sigma_w}{\sigma_{w'}} + \frac{\sigma_{w'}^2}{2\sigma_w^2 - \frac{1}{2}}\right)\label{eq:a_3_2}\\
+	&=-2\Delta w  + e^{2\Delta w} - 1 \label{eq:a_3_3}\\
+	&=2\Delta w^2  + o(\Delta w^3),\nonumber
+\end{align}
+where $H(\cdot\|\cdot)$ is the Kullback-Leibler (KL) divergence, (\ref{eq:a_3_1}) is from Pinsker's inequality \cite{pinsker1960information}, (\ref{eq:a_3_2}) is from the expression of the KL divergence for Gaussian distributions with equal mean \cite{gil2013renyi}, 
+and (\ref{eq:a_3_3}) is from expanding $e^{\Delta w}$ in Taylor's series up to the second order. 
+Note how the $\sup$ on states can be dropped since $\sigma$ is state-independent.
+\end{proof}
+
+\safesigma*
+\begin{proof}
+We proof the three statements in order:\hfill\,\linebreak
+\textbf{Statement (\ref{stat:2_1})}: we start from Lemma 3.1 from \cite{adaptive_step}:
+\begin{align}
+J(\vtheta')-J(\vtheta) &\geq \frac{1}{1-\gamma}\int_{\Sspace}d_{\rho}^{\vtheta}(s)\int_{\Aspace}(\pi_{\vtheta'}(a\vert s) - \pi_{\vtheta}(a\vert s))Q^{\vtheta}(s,a)\de a \de s \nonumber\\
+&- \frac{\gamma}{2(1-\gamma)^2}\norm[\infty]{\pi_{\vtheta'} - \pi_{\vtheta}}^2\norm[\infty]{Q^{\vtheta}},\label{eq:pirotta}
+\end{align}
+where $d_{\rho}^{\vtheta}(s) = (1-\gamma)\sum_{t=0}^{\infty}\gamma^t\Pr(s_t=s\vert\pi_{\vtheta},\rho)$ is the discounted future-state distribution and $Q^{\vtheta}(s,a) = \Reward(s,a)+\gamma\int_{\Sspace}\Transition(s'\vert s,a)\int_{\Aspace}\pi_{\vtheta}(a\vert s)Q^{\vtheta}(s',a')\de a' \de s'$ is the action-value function defined recursively by Bellman's equation. In our case of interest, $\vtheta = [\vv\mid w]$ and $\vtheta' = [\vv,w']$.
+We also need the Policy Gradient Theorem (PGT) \cite{Sutton:1999:PGM:3009657.3009806}, which we specialize to $\nabla_w J$:
+\[
+	\gradJ[w]{\vtheta} = \frac{1}{1-\gamma}\int_{\Sspace}d_{\rho}^{\vtheta}(s)
+	\int_{\Aspace}\nabla_w\pi_{\vtheta}(a\vert s)Q^{\vtheta}(s,a)\de a \de s.
+\] 
+Plugging the results of Lemmas \ref{lem:2} and \ref{lem:3} into (\ref{eq:pirotta}) we get:
+\begin{align}
+J(\vtheta') - J(\vtheta) &\geq \frac{1}{1-\gamma}\int_{\Sspace}d_{\rho}^{\vtheta}(s)
+\int_{\Aspace}\left(\nabla_w \policy \Delta w - \frac{\psi\Delta w^2}{2\sigma_w}\right)
+Q^{\vtheta}(s,a)\de a \de s \nonumber\\
+&- \frac{\gamma}{2(1-\gamma)^2}
+2\Delta w^2
+\norm[\infty]{Q^{\vtheta}},\label{eq:4_2_1}
+\end{align}
+where $o(\Delta w^3)$ terms, as stated, are neglected. By applying the PGT:
+\begin{align*}
+J(\vtheta') - J(\vtheta) &\geq 
+ \Delta w\gradJ[w]{\vtheta} - 
+\frac{1}{1-\gamma}\int_{\Sspace}d_{\rho}^{\vtheta}(s)
+\int_{\Aspace}\frac{\psi\Delta w^2}{2\sigma_w}
+Q^{\vtheta}(s,a)\de a \de s \\
+&- \frac{\gamma}{2(1-\gamma)^2}
+2\Delta w^2
+\norm[\infty]{Q^{\vtheta}} \\
+%
+&\geq \Delta w\gradJ[w]{\vtheta} - 
+\frac{\psi\Delta w^2}{2\sigma_w(1-\gamma)}
+\left|\int_{\Aspace}
+Q^{\vtheta}(s,a)\de a\right| \\
+&- \frac{\gamma}{2(1-\gamma)^2}
+2\Delta w^2
+\norm[\infty]{Q^{\vtheta}}.
+\end{align*}
+Next, following \cite{adaptive_step}, we upper bound the integral and the infinite norm of $Q^{\vtheta}$ with $\frac{|\Aspace|R}{1-\gamma}$ and $\frac{R}{1-\gamma}$, respectively, obtaining:
+\begin{align}
+J(\vtheta') - J(\vtheta)
+&\geq \Delta w\gradJ[w]{\vtheta} - 
+\Delta w^2
+\frac{R}{(1-\gamma)^2}\left(
+\frac{\psi|\Aspace|}{2\sigma_w} + 
+\frac{\gamma}{1-\gamma}\right).\label{eq:4_1_2}
+\end{align}
+Now, since $\Delta w = \beta\gradJ[w]{\vtheta}$,
+\begin{align*}
+J(\vtheta') - J(\vtheta)
+&\geq \beta\gradJ[w]{\vtheta}^2 - 
+\beta^2\gradJ[w]{\vtheta}^2
+\frac{R}{(1-\gamma)^2}\left(
+\frac{\psi|\Aspace|}{2\sigma_w} + 
+\frac{\gamma}{1-\gamma}\right).
+\end{align*}
+The proof is completed by renaming $\vv\gets\vv^{t+1}$, $w\gets w^t$ and $w'\gets w^{t+1}$.
+
+\textbf{Statement (\ref{stat:2_2})}:
+The right-hand side of (\ref{stat:2_1}) is a degree-$2$ polynomial in $\beta$. By nullifying its first derivative:
+\[
+	\gradJ[w]{\vv^{t+1}, w^t}^2 - 2\beta^* d\gradJ[w]{\vv^{t+1},w^t}^2 = 0,
+\]
+we get $\beta^* = \frac{1}{2d}$. Second derivative is $(-\gradJ[w]{\vtheta}^2)<0$, showing that we found a maximum. In fact, we are taking the vertex of a concave parabola. We obtain $C_{\text{max}}^w$ by plugging $\beta^*$ into the lower bound. Note that we always ignore the degenerate case $\gradJ[w]{\vtheta}=0$ since it would mean the policy parameters are already at convergence, hence no update should be performed whatsoever.
+
+\textbf{Statement (\ref{stat:2_3})}:
+Given (\ref{stat:2_1}), it is enough to require:
+\[
+	\beta\gradJ[w]{\vv^{t+1},w^t}^2 - \beta^2d\gradJ[w]{\vv^{t+1},w^t}^2 \geq \nu C
+\]
+and solve the inequality for $\beta$. Note that there is no real solution for $\nu C>C_{\text{max}}^w$.
+\end{proof}
+
+\simplev*
+\begin{proof}
+The corollary follows from Statement (\ref{stat:1_2}) in Theorem \ref{th:safetheta} and the following norm inequality, true for any $m$-dimensional vector $\mathbf{x}$:
+\[
+	\norm[\infty]{\mathbf{x}}^2 = \left(\max_i\{|x_i|\}\right)^2 = \frac{1}{m}\sum_{j=1}^m \left(\max_i\{|x_i|\}\right)^2
+	\geq \frac{1}{m}\sum_{j=1}^m x_j^2 = \frac{1}{m}\norm[2]{\mathbf{x}}^2.
+\]
+
+\end{proof}
+
+\allsafe*
+\begin{proof}
+Rename $\beta \gets \frac{\gradDelta(\vv^{t+1},w^t)}{\gradJ[w]{\vv^{t+1},w^t}}\beta$ in all the statements to obtain Theorem \ref{th:safesigma}. More intuitively, it suffices to consider steps in the direction of $\nabla_w\mathcal{L}$ instead of $\nabla_w J$. Each step in $\nabla_w\mathcal{L}$ has a corresponding (possibly negative) step in $\nabla_w J$, for which Theorem \ref{th:safesigma} applies. Geometrically, we are performing a projection between one-dimensional vector spaces (note that $\nabla_w J$ and $\nabla_w\mathcal{L}$ are scalars). The absolute value in (\ref{stat:4_3}) is necessary because $\tilde{\beta}$ may be negative. Again, we neglect the zero-gradient case since it coincides with convergence.  
+\end{proof}

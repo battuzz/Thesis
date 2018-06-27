@@ -202,6 +202,7 @@ Note that the greedy policy is the one that has always non-positive advantage fo
 
 \section{General methods to solve a MDP}
 \label{sec:solve-mdp}
+
 In the previous section we have seen that solving a MDP means finding an optimal policy $\pi^*$ with highest performance $J_\mu(\pi)$ which yields the optimal state-value function $V^*(s)$. Before diving into specific methods that aims at solving a MDP, we will proceed to describe some classification for learning algorithm classes.\\
 First of all, we have to distinguish between a \textit{target} policy and a \textit{behaviour} policy: the target policy is the output of the algorithm, the one that is intended to solve the MDP. The behaviour policy, instead, is a policy that is used to collect the trajectory samples that will be used for learning. Depending on how the trajectories used to learn the target policy are collected, a learning algorithm can operate on-policy or off-policy:
 \begin{itemize}
@@ -360,9 +361,10 @@ That can be estimated via roll-outs of the policy $\pi_{\vtheta}$:
 \hat{\nabla}_{\vtheta}J_\mu(\vtheta) = \EV[a \sim \pi_{\vtheta}, s_0 \sim \mu]{\nabla_{\vtheta} \log \pi(a|s) Q^{\pi_{\vtheta}}(s,a) }
 \]
 The estimation of the action-value function can be done with any of the methods seen in the previous section, but a straightforward way to estimate it is directly from discounted rewards: $\hat{Q}^{\pi_{\vtheta}}(s,a) \simeq \sum_{k=0}^H \gamma^k\rfunc (s_k,a_k)$. Using this latter approximation, we obtain the REINFORCE estimator as proposed by Williams~\cite{Williams92simplestatistical}:
-\[
+\begin{equation}
+\label{eq:reinforce}
 \hat{\nabla}_{\vtheta}J_\mu(\vtheta)_{RF} = \left\langle \left(\sum_{k=0}^{H} \nabla_{\vtheta}\log\pi_{\vtheta}(a_k|s_k)  \right)\left(\sum_{k=0}^H \gamma^k\rfunc(s_k,a_k)\right) \right\rangle_{N}
-\]
+\end{equation}
 where $N$ is the batch size. The advantages of this approach with respect to finite difference is that it is possible to have a gradient estimation even from a single roll-out, guaranteed faster convergence and it has yielded more real-world results. Besides these factors, REINFORCE gradient estimator suffer from high variance in its estimations that grow at least cubically with the length of the horizon and quadratically with the magnitude of the reward.\\
 A better approach comes from the observation that future actions do not depend on past rewards, leading to two formulations from~\cite{Sutton:1999:PGM:3009657.3009806}:
 \[

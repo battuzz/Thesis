@@ -591,3 +591,165 @@ volume = "23",
 year = "1952"
 }
 
+
+@inproceedings{ziebart_maximum_2008,
+	title = {Maximum {Entropy} {Inverse} {Reinforcement} {Learning}.},
+	volume = {8},
+	booktitle = {{AAAI}},
+	publisher = {Chicago, IL, USA},
+	author = {Ziebart, Brian D. and Maas, Andrew L. and Bagnell, J. Andrew and Dey, Anind K.},
+	year = {2008},
+	pages = {1433--1438}
+}
+
+@inproceedings{toussaint_robot_2009,
+	address = {New York, NY, USA},
+	series = {{ICML} '09},
+	title = {Robot {Trajectory} {Optimization} {Using} {Approximate} {Inference}},
+	isbn = {978-1-60558-516-1},
+	url = {http://doi.acm.org/10.1145/1553374.1553508},
+	doi = {10.1145/1553374.1553508},
+	abstract = {The general stochastic optimal control (SOC) problem in robotics scenarios is often too complex to be solved exactly and in near real time. A classical approximate solution is to first compute an optimal (deterministic) trajectory and then solve a local linear-quadratic-gaussian (LQG) perturbation model to handle the system stochasticity. We present a new algorithm for this approach which improves upon previous algorithms like iLQG. We consider a probabilistic model for which the maximum likelihood (ML) trajectory coincides with the optimal trajectory and which, in the LQG case, reproduces the classical SOC solution. The algorithm then utilizes approximate inference methods (similar to expectation propagation) that efficiently generalize to non-LQG systems. We demonstrate the algorithm on a simulated 39-DoF humanoid robot.},
+	urldate = {2018-02-20},
+	booktitle = {Proceedings of the 26th {Annual} {International} {Conference} on {Machine} {Learning}},
+	publisher = {ACM},
+	author = {Toussaint, Marc},
+	year = {2009},
+	pages = {1049--1056}
+}
+
+@inproceedings{rawlik_stochastic_2013,
+	title = {On {Stochastic} {Optimal} {Control} and {Reinforcement} {Learning} by {Approximate} {Inference} ({Extended} {Abstract})},
+	copyright = {Authors who submit to this conference agree to the following terms:    a) Authors transfer their copyrights in their paper to the International Joint Conferences on Artificial Intelligence, Inc. (IJCAI), in order to deal with future requests for reprints, translations, anthologies, reproductions, excerpts, and other publications. This grant will include, without limitation, the entire copyright in the paper in all countries of the world, including all renewals, extensions, and reversions thereof, whether such rights currently exist or hereafter come into effect, and also the exclusive right to create electronic versions of the paper, to the extent that such right is not subsumed under copyright.    b) Every named author warrants that he/she is the sole author and owner of the copyright in the paper, except for those portions shown to be in quotations; that the paper is original throughout; and that their right to make the grants set forth above is complete and unencumbered. If anyone brings any claim or action alleging facts that, if true, constitute a breach of any of the foregoing warranties, each author, individually and collectively, will hold harmless and indemnify IJCAI, their grantees, their licensees, and their distributors against any liability, whether under judgment, decree, or compromise, and any legal fees and expenses arising out of that claim or actions, and the undersigned will cooperate fully in any defense IJCAI may make to such claim or action. Moreover, each author agrees to cooperate in any claim or other action seeking to protect or enforce any right the author has granted to IJCAI in the paper. If any such claim or action fails because of facts that constitute a breach of any of the foregoing warranties, each author agrees to reimburse whomever brings such claim or action for expenses and attorney\&rsquo;s fees incurred therein.   c) \&nbsp;In return for these rights, IJCAI hereby grants to each author, and the employers for whom the work was performed, royalty-free permission to: 1. retain all proprietary rights (such as patent rights) other than copyright and the publication rights transferred to IJCAI; 2. personally reuse all or portions of the paper in other works of their own authorship; 3. make oral presentation of the material in any forum; 4. reproduce, or have reproduced, the  paper for the author\&rsquo;s personal use, or for company use provided that IJCAI copyright and the source are indicated, and that the copies are not used in a way that implies IJCAI endorsement of a product or service of an employer, and that the copies per se are not offered for sale. The foregoing right shall not permit the posting of the paper in electronic or digital form on any computer network, except by the author or the author\&rsquo;s employer, and then only on the author\&rsquo;s or the employer\&rsquo;s own World Wide Web page or ftp site. Such Web page or ftp site, in addition to the aforementioned requirements of this Paragraph, must provide an electronic reference or link back to the IJCAI electronic server (http://www.ijcai.org), and shall not post other IJCAI copyrighted materials not of the author\&rsquo;s or the employer\&rsquo;s creation (including tables of contents with links to other papers) without IJCAI\&rsquo;s written permission; \&gt;5. make limited distribution of all or portions of the above paper prior to publication. 6. In the case of work performed under U.S. Government contract, IJCAI grants the U.S. Government royalty-free permission to reproduce all or portions of the above paper, and to authorize others to do so, for U.S. Government purposes. In the event the above paper is not accepted and published by IJCAI, or is withdrawn by the author(s) before acceptance by IJCAI, this agreement becomes null and void.},
+	url = {https://www.aaai.org/ocs/index.php/IJCAI/IJCAI13/paper/view/6658},
+	abstract = {We present a reformulation of the stochastic optimal control problem in terms of KL divergence minimisation, not only providing a unifying perspective of previous approaches in this area, but also demonstrating that the formalism leads to novel practical approaches to the control problem. Specifically, a natural relaxation of the dual formulation gives rise to exact iterative solutions to the finite and infinite horizon stochastic optimal control problem, while direct application of Bayesian inference methods yields instances of risk sensitive control.},
+	language = {en},
+	urldate = {2018-02-20},
+	booktitle = {Twenty-{Third} {International} {Joint} {Conference} on {Artificial} {Intelligence}},
+	author = {Rawlik, Konrad and Toussaint, Marc and Vijayakumar, Sethu},
+	month = jun,
+	year = {2013}
+}
+
+@article{fox_taming_2015,
+	title = {Taming the {Noise} in {Reinforcement} {Learning} via {Soft} {Updates}},
+	url = {http://arxiv.org/abs/1512.08562},
+	abstract = {Model-free reinforcement learning algorithms, such as Q-learning, perform poorly in the early stages of learning in noisy environments, because much effort is spent unlearning biased estimates of the state-action value function. The bias results from selecting, among several noisy estimates, the apparent optimum, which may actually be suboptimal. We propose G-learning, a new off-policy learning algorithm that regularizes the value estimates by penalizing deterministic policies in the beginning of the learning process. We show that this method reduces the bias of the value-function estimation, leading to faster convergence to the optimal value and the optimal policy. Moreover, G-learning enables the natural incorporation of prior domain knowledge, when available. The stochastic nature of G-learning also makes it avoid some exploration costs, a property usually attributed only to on-policy algorithms. We illustrate these ideas in several examples, where G-learning results in significant improvements of the convergence rate and the cost of the learning process.},
+	urldate = {2018-02-20},
+	journal = {arXiv:1512.08562 [cs, math]},
+	author = {Fox, Roy and Pakman, Ari and Tishby, Naftali},
+	month = dec,
+	year = {2015},
+	note = {arXiv: 1512.08562},
+	keywords = {Computer Science - Information Theory, Computer Science - Learning}
+}
+
+
+@article{haarnoja_reinforcement_2017,
+	title = {Reinforcement {Learning} with {Deep} {Energy}-{Based} {Policies}},
+	url = {http://arxiv.org/abs/1702.08165},
+	abstract = {We propose a method for learning expressive energy-based policies for continuous states and actions, which has been feasible only in tabular domains before. We apply our method to learning maximum entropy policies, resulting into a new algorithm, called soft Q-learning, that expresses the optimal policy via a Boltzmann distribution. We use the recently proposed amortized Stein variational gradient descent to learn a stochastic sampling network that approximates samples from this distribution. The benefits of the proposed algorithm include improved exploration and compositionality that allows transferring skills between tasks, which we confirm in simulated experiments with swimming and walking robots. We also draw a connection to actor-critic methods, which can be viewed performing approximate inference on the corresponding energy-based model.},
+	urldate = {2018-02-20},
+	journal = {arXiv:1702.08165 [cs]},
+	author = {Haarnoja, Tuomas and Tang, Haoran and Abbeel, Pieter and Levine, Sergey},
+	month = feb,
+	year = {2017},
+	note = {arXiv: 1702.08165},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Learning}
+}
+
+@inproceedings{hans2008safe,
+  title={Safe exploration for reinforcement learning.},
+  author={Hans, Alexander and Schneega{\ss}, Daniel and Sch{\"a}fer, Anton Maximilian and Udluft, Steffen},
+  booktitle={ESANN},
+  pages={143--148},
+  year={2008}
+}
+@article{moldovan2012safe,
+  title={Safe exploration in Markov decision processes},
+  author={Moldovan, Teodor Mihai and Abbeel, Pieter},
+  journal={arXiv preprint arXiv:1205.4810},
+  year={2012}
+}
+@article{garcia2012safe,
+  title={Safe exploration of state and action spaces in reinforcement learning},
+  author={Garcia, Javier and Fern{\'a}ndez, Fernando},
+  journal={Journal of Artificial Intelligence Research},
+  volume={45},
+  pages={515--564},
+  year={2012}
+}
+@inproceedings{munos2016safe,
+  title={Safe and efficient off-policy reinforcement learning},
+  author={Munos, R{\'e}mi and Stepleton, Tom and Harutyunyan, Anna and Bellemare, Marc},
+  booktitle={Advances in Neural Information Processing Systems},
+  pages={1054--1062},
+  year={2016}
+}
+
+@article{garcia2015comprehensive,
+  title={A comprehensive survey on safe reinforcement learning},
+  author={Garc{\i}a, Javier and Fern{\'a}ndez, Fernando},
+  journal={Journal of Machine Learning Research},
+  volume={16},
+  number={1},
+  pages={1437--1480},
+  year={2015}
+}
+
+@inproceedings{gehring2013smart,
+  title={Smart exploration in reinforcement learning using absolute temporal difference errors},
+  author={Gehring, Clement and Precup, Doina},
+  booktitle={Proceedings of the 2013 international conference on Autonomous agents and multi-agent systems},
+  pages={1037--1044},
+  year={2013},
+  organization={International Foundation for Autonomous Agents and Multiagent Systems}
+}
+
+@inproceedings{nutinicoordinate,
+  title={Coordinate descent converges faster with the Gauss-Southwell rule than random selection},
+  author={Nutini, Julie and Schmidt, Mark and Laradji, Issam and Friedlander, Michael and Koepke, Hoyt},
+  booktitle={International Conference on Machine Learning},
+  pages={1632--1641},
+  year={2015}
+}
+
+@inproceedings{silver2014deterministic,
+  title={Deterministic policy gradient algorithms},
+  author={Silver, David and Lever, Guy and Heess, Nicolas and Degris, Thomas and Wierstra, Daan and Riedmiller, Martin},
+  booktitle={ICML},
+  year={2014}
+}
+
+
+@article{gil2013renyi,
+  title={R{\'e}nyi divergence measures for commonly used univariate continuous distributions},
+  author={Gil, Manuel and Alajaji, Fady and Linder, Tamas},
+  journal={Information Sciences},
+  volume={249},
+  pages={124--131},
+  year={2013},
+  publisher={Elsevier}
+}
+@article{pinsker1960information,
+  title={Information and information stability of random variables and processes},
+  author={Pinsker, Mark S},
+  year={1960},
+  publisher={Izv. Akad. Nauk}
+}
+@article{kingma2014adam,
+  title={Adam: A method for stochastic optimization},
+  author={Kingma, Diederik P and Ba, Jimmy},
+  journal={arXiv preprint arXiv:1412.6980},
+  year={2014}
+}
+
+@book{sutton1998reinforcement,
+  title={Reinforcement learning: An introduction},
+  author={Sutton, Richard S and Barto, Andrew G},
+  volume={1},
+  number={1},
+  year={1998},
+  publisher={MIT press Cambridge}
+}
+

@@ -1,0 +1,21 @@
+\chapter{Multi-dimensional actions}\label{app:multi}
+In this section we extend the results of the paper to the more general case of multi-dimensional action spaces.
+As mentioned in Section \ref{sec:mdp}, a common policy class for the case $\Aspace\in\mathbb{R}^l$ is the factored Gaussian, \ie a multi-variate Gaussian distribution having a diagonal covariance matrix $\Sigma_{\vtheta}$. We denote with $\vsigma_{\vtheta}$ the vector of the diagonal elements, \ie $\Sigma_{\vtheta} = \mathop{diag}(\vsigma_{\vtheta})$. So, with a little abuse of notation\footnote{This allows us to avoid the much more cumbersome matrix notation, where even $\vv$ is a matrix.}, we can write the factored Gaussian policy as:
+\[
+\pi_{\vtheta}(a\vert s) = \frac{1}{\sqrt{2\pi}\vsigma_{\vtheta}}\exp\left\{-\frac{1}{2}\left(\frac{a - \mu_{\vtheta}(s)}{\vsigma_{\vtheta}}\right)^2\right\},
+\]
+where all vector operations are component-wise. The result is, of course, a multi-dimensional action. The natural generalization of Parametrization (\ref{eq:parametrization}) is:
+\begin{align}\label{eq:parametrization_multi}
+\mu_{\vtheta}(s)=\vv^T\vphi(s), \qquad \vsigma_{\vtheta}=e^{\vw}, \qquad \vtheta=[\vv\vert \vw],
+\end{align}
+where $\vw$ is an $l$-dimensional vector. Following what \cite{adaptive_batch} do for the mean parameter, we update $\vw$ by greedy coordinate descent as well. All the results on $\vv$ naturally extends to $\vw$ since the bounds in Theorems \ref{th:safesigma} and \ref{th:safe_exp} differ from the one in \ref{th:safetheta} only by a constant. We just provide the multi-dimensional version of Update \ref{up:morexp}:
+\begin{align*}
+\begin{cases}
+v_{k}^{t+1} \gets \overline{\alpha}\gradJ[v_{k}]{\vv^t,w^t}
+& \text{if}\:k =  \argmax_i |\gradJ[v_i]{\vv^t, w^t}| \:\text{else}\:v_{k}^t,\\
+w_h^{t+1} \gets \overline{\beta}\nabla_{w_h}\mathcal{L}(\vv^{t+1}, w^t)
+& \text{if}\:h =  \argmax_j |\nabla_{w_j}\mathcal{L}(\vv^t, w^t)| \:\text{else}\:w_{h}^t.
+\end{cases}
+\end{align*}
+An even further generalization would be to consider a non-diagonal covariance matrix. This is interesting, but out of the scope of this work: in this paper we study the effects of the variance on exploration, while a full covariance matrix also models correlations among action dimensions that may be useful to learn in some tasks.
+Another promising generalization, left to future work, is represented by a state-dependent policy variance, which would allow a more powerful kind of exploration.

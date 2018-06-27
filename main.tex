@@ -2,12 +2,12 @@
 
 \usepackage{graphicx}
 \usepackage{tabularx}
-\usepackage{subfigure}
+%\usepackage{subfigure}
 \usepackage{afterpage}
 \usepackage{amsmath,amssymb}            
 \usepackage{rotating}  
 \usepackage{fancyhdr}  
-\usepackage[scriptsize]{caption} 
+%\usepackage[scriptsize]{caption} 
 \usepackage{cite}
 \usepackage{hyperref}
 \usepackage{amsthm}
@@ -20,6 +20,11 @@
 %\usepackage{wrapfig}
 \usepackage{cutwin}
 \usepackage[calc]{adjustbox}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{mathtools}
+\usepackage[makeroom]{cancel}
+\usepackage{caption, subcaption}
 % ===================================================
 % PAGE LAYOUT
 % ===================================================
@@ -51,6 +56,7 @@
 % ===================================================
 % THEOREMS
 % ===================================================
+\usepackage{thmtools, thm-restate}
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -84,6 +90,85 @@
 \newcommandx{\poladv}[2][1, 2]{\mathbb{A}_{#1}^{#2}}
 \newcommand{\norm}[2][1]{\left\| #2 \right\|_{#1}}
 \newcommand{\transpose}[1]{{#1}^{\mathsf{T}}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\DeclareRobustCommand{\eg}{e.g.,\@\xspace}
+\DeclareRobustCommand{\ie}{i.e.,\@\xspace}
+\DeclareRobustCommand{\wrt}{w.r.t.\@\xspace}
+%=====================================
+% MATH COMMANDS
+%-------------------------------------
+%\newcommand{\vtheta}{\boldsymbol{\theta}}
+\newcommand{\vsigma}{\boldsymbol{\sigma}}
+\newcommand{\vTheta}{\boldsymbol{\Theta}}
+\newcommand{\realspace}{\mathbb R}      % realspace
+\newcommand{\pdim}{m}
+%\newcommand{\transpose}[1]{{#1}^\texttt{T}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+%\DeclareMathOperator*{\EV}{\mathbb{E}}
+
+\DeclareMathOperator*{\Var}{\mathbb{V}ar}
+
+
+
+
+\newcommand{\EVV}[2][\ppvect \in \ppspace]{\EV_{#1}\left[{#2}\right]}
+%\newcommand{\norm}[2][\infty]{\left\|#2\right\|_{#1}}
+\newcommand{\vphi}{\boldsymbol{\phi}}
+\newcommand{\vv}{\boldsymbol{v}}
+\newcommand{\vw}{\boldsymbol{w}}
+\newcommand{\jbase}[1][t]{{J_{B}^{#1}}}
+\newcommand{\vtarget}[1][t]{{\underline{\vtheta}^{\,#1}}}
+\newcommand{\wtarget}[1][t]{{\underline{w}^{\,#1}}}
+%\newcommand{\vtarget}[1][t]{{\vtheta_{target}^{#1}}}
+
+%\newcommand{\de}{\,\mathrm{d}}
+%RL
+\newcommand{\Aspace}{\mathcal{A}}
+\newcommand{\Sspace}{\mathcal{S}}
+\newcommand{\Tspace}{\mathcal{T}}
+\newcommand{\Transition}{\mathcal{P}}
+\newcommand{\Reward}{\mathcal{R}}
+\newcommand{\policy}{\pi_{\vtheta}(a \vert s)}
+%\newcommand{\pol}{\pi_{\vtheta}}
+\newcommand{\gradJ}[2][\vtheta]{\nabla_{#1} J(#2)}
+\newcommand{\score}[2]{\nabla_{\vtheta}\log p_{#1}(#2)}
+\newcommand{\gradApp}[3][N]{\widehat{\nabla}_{#2}^{#1}J(#3)}
+%\newcommand{\Deltav}{\underline{\Delta_{\vv}}J}
+\newcommand{\Deltav}{\mathcal{L}}
+\newcommand{\gradDelta}[1][w]{\nabla_{#1}\Deltav}
+%\newcommand{\we}[1][]{{e^{#1w}}}
+\newcommand{\we}[1][]{{\sigma ^{#1}}}
+\renewcommand{\score}[2][\vtheta]{\nabla_{#2}\log p_{#1}(\tau)}
+\newcommand{\gradlogsumpi}[4]{\sum_{#1=#2}^{#3}\nabla_{#4}\log\pi_{#1}}
+
+
+
+
+
+
+
+
+
+
+
+
+
 % ===================================================
 % HEADERS AND FOOTERS
 % ===================================================
@@ -128,12 +213,12 @@
 \tableofcontents 
 \smartdoubleflush
 
-
 \include{chapter1} \smartdoubleflush
 \include{chapter2} \smartdoubleflush
 \include{chapter3} \smartdoubleflush
 \include{chapter4} \smartdoubleflush
 \include{chapter5} \smartdoubleflush
+\include{chapter6} \smartdoubleflush
 
 \phantomsection
 \nocite{*}
@@ -148,8 +233,8 @@
 
 \include{appendixA} \smartdoubleflush
 \include{appendixB} \smartdoubleflush
-
-
+\include{appendixC} \smartdoubleflush
+\include{appendixD}
 \end{document}
 
 

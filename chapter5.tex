@@ -1,16 +1,67 @@
-\chapter{Conclusions}
-\label{ch:conclusions}
+\chapter{Experimental analysis}
+\label{ch:experim}
 \thispagestyle{empty}
 
-\begin{quotation}
-{\footnotesize
-\noindent \emph{``Terence: Ma scusa di che ti preoccupi, i piedipiatti hanno altro a cui pensare, in questo momento stanno cercando due cadaveri scomparsi \\
-Bud: Se non spegni quella sirena uno di quei due cadaveri scomparsi lo trovano di sicuro!''}
-\begin{flushright}
-Nati con la camicia
-\end{flushright}
-}
-\end{quotation}
-\vspace{0.5cm}
+\fancyhead[LE,RO]{\bfseries\thepage}                               
+\fancyhead[RE]{\bfseries\leftmark}    
+\fancyhead[LO]{\bfseries\rightmark}  
 
-\noindent Si mostra il progetto dell'architettura del sistema con i vari moduli.
+\section{Numerical Simulations}\label{sec:exp}
+
+\begin{table}
+\caption{Upper bound confidence intervals at 95\% of $|\vv - \vv^*|$ after 10,000 iterations.}\label{exp:convergence-speed}
+\resizebox{\linewidth}{!}{
+%\setlength{\tabcolsep}{0.55em}
+\begin{tabular}{rccccccccccc}
+\toprule 
+&\multicolumn{3}{c}{Adam} & \multicolumn{3}{c}{$\alpha = const$} &&&& \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7} 
+$\sigma$ & 1e-4 & 1e-05 & 1e-06 & 1e-4 & 1e-5 & 1e-6 & MI & LB-I & LB-II & LV & ZV \\
+\midrule
+0.1 & 0.126 & 0.432 & 0.506 & 0.132 & \textbf{0.026} & 0.228 & 0.515 & 0 .510 & 0.368 & 0.429 & 0.435 \\
+0.5 & 0.061 & 0.428 & 0.506 & 0.122 & 0.012 & 0.125 & 0.511 & 0.29 & 0.009 & 0.01 & \textbf{0.006} \\
+1.0 & 0.046 & 0.422 & 0.505 & 0.122 & 0.011 & 0.069 & 0.497 & \textbf{0.01} & 0.021 & 0.021 & 0.028 \\
+\bottomrule
+\end{tabular}
+}
+
+\end{table}
+In this section, we will test all SEPG variants on the linear-quadratic Gaussian (LQG) regulator problem~\cite{peters} and on the Mountain Car task~\cite{sutton1998reinforcement}.
+The LQG problem is defined by transition model $s_{t+1} \sim \mathcal{N}\left( s_t + a_t, \eta_0^2 \right)$, Gaussian policy $a_t \sim \mathcal{N} \left( \transpose{\vv} s, e^{2w} \right)$ and reward $r_t = -0.5\left(s_t^2 + a_t^2\right)$. Both action and state variables are bounded to the interval $[ -2, 2] $ and the initial state is drawn uniformly at random. This is a well-known problem and admits a closed-form solution for a Gaussian policy linear in state. We use a discount factor of $\gamma = 0.99$, which gives an optimal parameter $\vv^* \approx -0.615$ corresponding to expected deterministic performance $J(\vv^*,-\infty) \approx -7.753$. First, we use this task to highlight how different initial values of the policy variance affect the RL problem.
+Table \ref{exp:convergence-speed} shows a 95\%-confidence upper bound  on the absolute error $|\vv - \vv^*|$ after 10,000 iterations. We compare our algorithms to REINFORCE with constant step size ($\alpha = \beta = const$) and Adam~\cite{kingma2014adam}. The mean parameter is set to $\vv = -0.1$ in all cases. We can see that the optimal strategy depends on the initial value of $\sigma$. Our algorithms, of course, cannot outperform all possible manual step-size settings, but allow to completely skip the tuning, which depends on the domain and on policy initialization. Moreover, they show comparable convergence speed w.r.t. non-safe approaches. 
+%Moreover, high values of $\sigma$ reduce the uncertainty of the gradient, thus reducing the size of the confidence interval. 
+%We also see that our algorithms perform better with higher starting $\sigma$, because it makes the performance improvement bounds less conservative from the start. 
+\begin{figure}
+\begin{subfigure}[t]{0.31\textwidth}
+\includegraphics[width=\textwidth, height=0.8\textwidth]{./pictures/Plot_bounded8.pdf}
+\caption{Performance of SEPG variants} \label{fig:plot_j}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.33\textwidth}
+\includegraphics[width=\textwidth, height=0.75\textwidth]{./pictures/PlotDet5.pdf}
+\caption{Deterministic policy performance}\label{fig:plot_det}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.31\textwidth}
+\includegraphics[width=\textwidth, height=0.8\textwidth]{./pictures/PlotSigma6.pdf}
+\caption{Value of $\sigma$ following~$\gradDelta(\vtheta)$}\label{fig:plot_sigma}
+\end{subfigure}
+\caption{Results on the LQG domain.} 
+\label{fig:perf_LQG}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}[t]{0.31\textwidth}
+\includegraphics[width=\textwidth, height=0.8\textwidth]{./pictures/plot_MC3.pdf}
+\end{subfigure}
+\begin{subfigure}[t]{0.31\textwidth}
+\includegraphics[width=\textwidth, height=0.8\textwidth]{pictures/plot_MC_sigma3.pdf}
+\end{subfigure}
+\caption{Mountain Car task, starting from a very low variance}
+\end{figure}\label{fig:mc}
+The behavior of SEPG is shown in detail in Figure~\ref{fig:perf_LQG}: (a) shows the performance of the exploratory policies (with the baseline performance denoted by a red dashed line), (b) the deterministic policy optimized by ZV and (c) the evolution of $\sigma$ in the different variants. Note how type-I variants (MI, LB-I) spend the budget to improve $J(\vtheta)$, while type-II variants (LB-II, LV, ZV) invest it in exploration. ZB, in particular, increases $\sigma$ a lot, losing in terms of $J(\vtheta)$ but finding a good deterministic relatively fast.
+
+We use Mountain Car (in the \textit{openai/gym} implementation) to show the advantages of our algorithm in a situation where exploration is particularly important. We set $\sigma^0 = 0.2$:
+this makes the task very difficult, because the agent must explore in order to reach the goal at least once before actually solving the problem. By providing a nominal initial budget ($B^0 = 1$), our method (in the ZB variant) starts investing more and more in exploration until it sees the goal, and is ultimately able to solve the problem (Figure \ref{fig:mc} shows performance on the left and policy variance on the right). A naive gradient ascent update (Adam in the picture, but the same can be shown for any reasonable fixed step size), instead, is not far-sighted enough to see any advantage in increasing $\sigma$, and gets stuck immediately. 
+
+\section{Conclusions}
+In this paper, we built a safe RL framework, identifying some interesting classes of safety requirements; we extended performance improvement bounds on policy gradient with Gaussian policies to include an exploratory behavior; we provided a general algorithm that can be adapted to these requirements, and evaluated its variants on continuous control tasks. This represents a step towards policy gradient algorithms that can be employed efficiently and safely in real applications. Future work should focus on extending the theoretical guarantees to other classes of policies, automating the selection of other meta-parameters (such as the batch size \cite{adaptive_batch}), developing more insightful budget-allocation strategies for SEPG, and studying other, more sophisticated  exploration techniques.

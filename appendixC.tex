@@ -1,0 +1,98 @@
+\chapter{Approximate Framework}\label{sec:approx}
+As mentioned in Section \ref{sec:approx_short}, when the gradient is estimated from samples, we can derive high-probability variants of the performance improvement bounds of Section \ref{sec:theory}, as done, \eg in \cite{adaptive_step}, \cite{adaptive_batch}.
+To do so, we need to bound the gradient estimation error in high probability, and this must be done for every gradient that we estimate (\eg $\nabla_{\vv}J, \nabla_wJ, \nabla_w\mathcal{L}$). To keep things simple, we make the following, very general assumption:
+
+\begin{restatable}[]{assumption}{boundederr}\label{ass:bounded_err}
+	For each gradient of interest $\nabla_{\vtheta} F$, there is an estimator $\widehat{\nabla}_{\vtheta}^NF$ using batches of $N$ samples and an $\epsilon_i>0$ such that:
+	\begin{align}
+	&\left|\nabla_{\theta_i}F - \widehat{\nabla}_{\theta_i}F\right| \leq \epsilon 
+		\quad\text{with probability at least $(1-\delta)$ for every $i=1,\dots,m$ and}\label{eq:c_1_1}\\
+	&\norm[\infty]{\widehat{\nabla}_{\vtheta}F} > \epsilon\quad\text{always}.\label{eq:c_1_2}
+	\end{align}
+\end{restatable}
+The latter statement (\ref{eq:c_1_2}) can be used as a stopping condition in iterative algorithms. In fact, when no (estimated) gradient component is greater than noise $\epsilon$, no reliable coordinate-ascent policy update can be performed. It remains to characterize the gradient estimation error to satisfy (\ref{eq:c_1_2}) in an useful and meaningful way. This can be done by employing known, distribution-independent statistical inequalities such as Chebyshev's, Hoeffding's or variants of Bernstein's inequality, as done in \cite{adaptive_batch}. In this work, we choose to employ t-based confidence intervals to obtain less conservative high-probability bounds:
+\begin{align*}
+	&\epsilon_i \coloneqq t_{\nicefrac{\delta}{2}, N-1}\sqrt{\frac{\widehat{\Var}\left[\widehat{\nabla}_{\theta_i}F\right]}
+		{N}},\\
+	&\epsilon = \max_i\{\epsilon_i\},
+\end{align*}
+where $\widehat{\Var}$ is the sample variance and $t_{\nicefrac{\delta}{2},N-1}$ is the $(1-\nicefrac{\delta}{2})$-quantile of a Student's t-distribution with $N-1$ degrees of freedom. Note that all the estimators that we employ are unbiased (REINFORCE for the policy gradient, the estimator proposed in Appendix \ref{app:estimating} for $\nabla_w\mathcal{L}$). However, the underlying trajectory-generating process being clearly non-Gaussian, we need to invoke the Central Limit Theorem, \ie our t-based confidence interval satisfies Assumption \ref{ass:bounded_err} only in the limit of an infinite batch size. We do not think this is critical since we use $N\sim 100$, and especially because the performance improvement bounds of Section \ref{sec:theory} are made very conservative by problem-dependent constants anyway. In the safe-RL literature, a similar \text{false-Gaussianity} assumption is done in \cite{pmlr-v37-thomas15}, albeit with different motivations. The same authors call \textit{semi-safe} an algorithm that makes a false, but reasonable assumption. This, however can be seen as an implementation choice, since Assumption \ref{ass:bounded_err} could be satisfied in more rigorous ways (see \cite{adaptive_batch} for some examples).
+
+Once the estimation error has been characterized,
+we can define the following lower-corrected and upper-corrected gradient norms:
+\begin{align*}
+&\norm[\infty]{\widehat{\nabla}_{\vtheta}^NF}^- = \norm[\infty]{\widehat{\nabla}_{\vtheta}^NF} - \mathbf{\epsilon},  \qquad \norm[\infty]{\widehat{\nabla}_{\vtheta}^NF}^+ = \norm[\infty]{\widehat{\nabla}_{\vtheta}^NF} + \mathbf{\epsilon},
+\end{align*}
+where $\mathbf{\epsilon}=[\epsilon_1,\dots,\epsilon_m]^T$. To obtain high-probability variants of the Theorems from Section \ref{sec:theory}, it is enough to replace the true gradient norms with the corrected norms. The choice of lower-corrected versus upper-corrected must be made in order to preserve the inequalities. Note how (\ref{eq:c_1_2}) guarantees that $\norm[\infty]{\nabla_{\vtheta}^NF}^-$ is always positive, allowing to safely take the square in inequalities. We now provide the high-probability variants of the Theorems from Section \ref{sec:theory}:
+
+\begin{restatable}[Adapted from Corollary 3.8 from~\cite{adaptive_batch}]{theorem}{safethetaapp}\label{th:safethetaapp}
+	Assuming $\sigma = \text{const}$, update rule (\ref{up:onlyv}), where $\nabla_{\vv}J$ is replaced by an estimator $\widehat{\nabla}_{\vv}J$ satisfying Assumption \ref{ass:bounded_err}, guarantees \textbf{with probability at least $(1-\delta)^m$}:
+	\begin{align}
+	J(\vv^{t+1}) - J(\vv^t) \geq \alpha\left(\norm[\infty]{\gradJ[\vv]{\vv^t}}^-\right)^2 - 
+	\alpha^2 c \left(\norm[\infty]{\gradJ[\vv]{\vv^t}}^+\right)^2,
+	\end{align}
+	where $c = \frac{RM_{\phi}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\mathcal{A}|}{\sqrt{2\pi}\sigma} +	\frac{\gamma}{2(1-\gamma)}\right)$ and  $|\mathcal{A}|$ is the volume of the action space. Guaranteed improvement is maximized by using a step size $\alpha^* = \frac{1}{2c}$, yielding:
+	\begin{align}
+	J(\vv^{t+1}) - J(\vv^t) \geq \frac{\left(\norm[\infty]{\gradJ{\vv^t}}^-\right)^4}{4c\left(\norm[\infty]{\gradJ{\vv^t}}^+\right)^2}
+	\coloneqq C_{\text{max}}^{\vv},
+	\end{align}
+	with probability at least $(1-\delta)^m$. Moreover, for any $C\leq C_{\text{max}}^{\vv}$, the following constraints on the step-size $\alpha$:
+	\begin{align}
+	|\alpha - \alpha^*| \leq \lambda_{\vv}\alpha^*, 
+	\end{align}
+	where $\lambda_{\vv}=\sqrt{1 - \nicefrac{C}{C_{\text{max}}^{\vv}}}$, are enough to guarantee $J(\vv^{t+1}) - J(\vv^t)\geq C$ with probability at least~${(1-\delta)^m}$.
+\end{restatable}
+
+The gradients \wrt $w$ are scalar, but we keep the norm notation for the sake of conciseness:
+%
+\begin{restatable}[]{theorem}{safesigmaapp}\label{th:safesigmaapp}
+	Assuming $o(|\Delta w|^3)$ terms can be neglected, the $w$-update in (\ref{eq:naive_update}), where $\nabla_wJ$ is replaced by an estimator $\widehat{\nabla}_{w}J$ satisfying Assumption \ref{ass:bounded_err}, guarantees, with probability at least $(1-\delta)$:
+	\begin{align}
+	J(\vv^{t+1}, w^{t+1}) - J(\vv^{t+1}, w^t) \geq \beta\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\right)^2 - \beta^2 d\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^+\right)^2,
+	\end{align}
+	where $d=\frac{R}{(1-\gamma)^2}\left(\frac{\psi|\Aspace|}{2\sigma_{w}}+\frac{\gamma}{1-\gamma}\right)$ and $\psi = \nicefrac{4(\sqrt{7} - 2)\exp(\nicefrac{\sqrt{7}}{2} - 2)}{\sqrt{2\pi}} \simeq 0.524$. Guaranteed improvement is maximized by using a step size $\beta^*=\frac{1}{2d}$, yielding:
+	\begin{align}
+	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1}, w^t) \geq \frac{\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\right)^4}{4d\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^+\right)^2}
+	\coloneqq C_{\text{max}}^w, 
+	\end{align}
+	with probability at least $(1-\delta)^m$. Moreover, for any $\nu C\leq C_{\text{max}}^{w}$, the following constraints on the step-size $\beta$:
+	\begin{align}
+	|\beta - \beta^*| \leq \lambda_{w}\beta^*, 
+	\end{align}
+	where $\lambda_{w}=\sqrt{1 - \nicefrac{\nu C}{C_{\text{max}}^{w}}}$, are enough to guarantee $J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1},w^t)\geq \nu C$ with probability at least $(1-\delta)^m$.
+\end{restatable}
+
+
+\begin{restatable}[]{theorem}{allsafeapp}\label{th:safe_expapp}
+	Assuming $o(|\Delta w|^3)$ terms can be neglected, the $w$-update in (\ref{up:exp}), where $\nabla_wJ$ and $\nabla_w\mathcal{L}$ are replaced by estimators $\widehat{\nabla}_wJ$ and $\widehat{\nabla}_w\mathcal{L}$, respectively, satisfying Assumption \ref{ass:bounded_err}, guarantees, for any (possibly negative) step size $\beta$, with probability at least $(1-\delta)^m$:
+	\begin{align*}
+	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1},w^t) 
+	&\geq \beta\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^
+	-\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\\
+	&-
+	\beta^2 d \left(\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^+\right)^2.
+	\end{align*}
+	Guaranteed improvement is maximized by using a step size $\tilde{\beta} =\frac{\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^-}{2d\left(\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^+\right)^2}$, yielding:
+	\begin{align*}
+	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1}, w^t) \geq 
+	\left(\frac{\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^
+		-\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-}
+	{2d\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^+}\right)^2
+	\coloneqq C_{\text{max}}^w,
+	\end{align*}
+	with probability at least $(1-\delta)^m$. Moreover, for any $\nu C\leq C_{\text{max}}^{w}$, the following constraints on the step-size $\beta$:
+	\begin{align}
+	|\beta - \tilde{\beta}| \leq \lambda_{w}|\tilde{\beta}|,
+	\end{align}
+	where $\lambda_{w}=\sqrt{1 - \nicefrac{\nu C}{C_{\text{max}}^{w}}}$, are enough to guarantee $J(\vv^{t+1},w^t) - J(\vv^{t+1},w^t)\geq \nu C$ with probability at least $(1-\delta)^m$.
+\end{restatable}
+
+Finally, it should be noted that also performance $J(\vtheta)$ must be estimated from sample trajectories, so the budget employed in Algorithm \ref{alg:adaptive_exp} is also an estimate. We do not elaborate on this aspect, since this kind of stochasticity is inherent in the RL process. We just remark how even the more exploratory variants of SEPG tend to keep the total average return $[J(\vtheta^t) + J(\vtarget)]/2$ above the baseline.
+Here we show the behavior of SEPG-ZV on the LQG task:
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.6\textwidth, height=0.48\textwidth]{./pictures/PlotDet4.pdf}
+\caption{Behavior of SEPG-ZV on LQG.} 
+\label{fig:ZV_LQG}
+\end{figure} 
+
