@@ -1,0 +1,53 @@
+% Horizon penetrating coordinates (vs. Schwarzschild coordinates)
+% for a black hole spacetime, with excision
+% Author: Jonah Miller
+\documentclass[tikz,border=0pt]{standalone}
+\usepackage{tikz}
+\usepackage{pgf}
+\usetikzlibrary{arrows}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.markings}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+
+%\tikzset{>={Latex[length=3mm]}}
+
+\begin{document}
+\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, node distance=2.5cm, semithick]
+\tikzstyle{every state} = [draw=black, text=black, minimum size=1.5cm, thick, fill=blue!10]
+
+\node[state] (A) {\small Facebook\normalsize};
+\node[state] (B)[below of=A] {Class 1};
+\node[state] (C)[right of=B] {Class 2};
+\node[state] (D)[right of=C] {Class 3};
+\node[state] (E)[above of=D] {Pass};
+\node[state] (F)[below of=C] {Pub};
+\node[state, accepting] (G)[above of=C] {Sleep};
+
+\draw (A) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-1};
+\draw (B) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-2};
+\draw (C) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-2};
+\draw (D) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-2};
+\draw (E) node[text=red, xshift=0cm, yshift=1cm)] {r=+10};
+\draw (F) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=+1};
+\draw (G) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=0};
+
+
+\path (A) edge[bend left] node[right]{0.1} (B)
+			edge[loop above] node[xshift=15pt,yshift=-12pt]{0.9}	(A)
+	(B) edge[bend left] node[left]{0.5} (A)
+		edge[] node[above]{0.5} (C)
+	(C) edge[] node[left]{0.2} (G)
+		edge[] node[above]{0.8} (D)	
+	(D) edge[] node[below,right]{0.4} (F)
+		edge[] node[right]{0.6} (E)
+	(E) edge[bend right] node[above]{1} (G)
+	(F) edge[bend left] node[left]{0.2} (B)
+		edge[bend left] node[left]{0.4} (C)
+		edge[bend right] node[right=7pt]{0.4} (D) 
+	;
+
+\end{tikzpicture}
+\end{document}

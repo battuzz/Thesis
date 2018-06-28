@@ -25,6 +25,7 @@
 \usepackage{mathtools}
 \usepackage[makeroom]{cancel}
 \usepackage{caption, subcaption}
+\usepackage[usenames,dvipsnames]{xcolor}
 % ===================================================
 % PAGE LAYOUT
 % ===================================================
@@ -92,8 +93,14 @@
 \newcommand{\transpose}[1]{{#1}^{\mathsf{T}}}
 
 
-
-
+\makeatletter
+\newcommand{\algcolor}[2]{%
+	\hskip-\ALG@thistlm\colorbox{#1}{\parbox{\dimexpr\linewidth-2\fboxsep}{\hskip\ALG@thistlm\relax #2}}%
+}
+\makeatother
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+\definecolor{bisque}{rgb}{1.0, 0.89, 0.77}
+\definecolor{teagreen}{rgb}{0.82, 0.94, 0.75}
 
 
 
@@ -233,8 +240,8 @@
 
 \include{appendixA} \smartdoubleflush
 \include{appendixB} \smartdoubleflush
-\include{appendixC} \smartdoubleflush
-\include{appendixD}
+\include{appendixC} %\smartdoubleflush
+%\include{appendixD}
 \end{document}
 
 

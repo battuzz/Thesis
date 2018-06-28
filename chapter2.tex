@@ -84,14 +84,14 @@ This task can be modelled with a continuous multidimensional state space $\sspac
 \end{example}
 \end{adjustbox}
 
+
+An agent in a MDP starts from an initial state drawn from the probability distribution $\mu$, $s_0 \sim \mu$. From this state, the agent can interact with the environment by executing an action $a_0 \in \aspace$. The environment receives action $a_0$ and reacts to this stimulus by returning to the agent the next state $s_1$ drawn from the transition function $s_1 \sim \tfunc(s_0, a_0)$ and a scalar reward $r_1 = \rfunc(s_0, a_0)$. From its new observation, the agent can continue the interaction with the environment by choosing another action $a_1$ and so on until it reaches the goal. We define the collected sequence of states, actions and rewards $\tau \sim s_0, a_0, s_1, r_1, a_1, s_2, \ldots$ trajectory. Sometimes we will refer to a trajectory with terms like samples or experience, since these collected informations will be used for the learning procedure.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{pictures/mdp_agent_environment}
 \caption{Agent-environment loop}
 \end{figure}
-
-An agent in a MDP starts from an initial state drawn from the probability distribution $\mu$, $s_0 \sim \mu$. From this state, the agent can interact with the environment by executing an action $a_0 \in \aspace$. The environment receives action $a_0$ and reacts to this stimulus by returning to the agent the next state $s_1$ drawn from the transition function $s_1 \sim \tfunc(s_0, a_0)$ and a scalar reward $r_1 = \rfunc(s_0, a_0)$. From its new observation, the agent can continue the interaction with the environment by choosing another action $a_1$ and so on until it reaches the goal. We define the collected sequence of states, actions and rewards $\tau \sim s_0, a_0, s_1, r_1, a_1, s_2, \ldots$ trajectory. Sometimes we will refer to a trajectory with terms like samples or experience, since these collected informations will be used for the learning procedure.
-
 
 Intuitively, the agent aims at maximizing the sum of the collected rewards. However this naive sum of rewards do not apply if we consider infinite-horizon MDPs, which is a common setting in the literature. In fact, summing over potentially infinite-length trajectories will cause the cumulative reward to grow indefinitely and lose its original meaning. (e.g. earning +1 at every step will have the same meaning of earning +100 at every step, since over an infinite horizon they will both grow to infinity).\\
 For this reason, it is common to consider a generalized version where we apply a discount factor $\gamma$ to the immediate reward and consider the cumulative discounted reward:
@@ -103,8 +103,22 @@ where $\gamma \in [0,1]$ is called discount factor.
 \end{definition}
 Note that the naive cumulative reward can be obtained by setting $\gamma=1$, and this is commonly used when the horizon is finite. 
 
+\begin{figure}[t]
+\centering
+\begin{subfigure}[t]{0.495\textwidth}
+\includegraphics[width=\textwidth]{pictures/mdp_example}
+\caption{Visual representation of the transition function (black) and reward function (red)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.495\textwidth}
+\includegraphics[width=\textwidth]{pictures/mdp_policy}
+\caption{Visual representation of a policy}
+\end{subfigure}
+\caption{Representation of a simple MDP}
+\end{figure}
+
 However, the addition of the discount factor has a well-known two-fold meaning: at a first glance, it represents how the agent is interested in future rewards. With $\gamma$ close to $0$, we have a myopic behaviour, where we are only interested in immediate rewards rather than long-term investments. With $\gamma$ close to $1$, instead, we are giving more value to long-term rewards. In the second place, $\gamma$ can also represent the probability that the simulation will continue for one more step. If $\gamma$ is low, we should strive to get as much as we can because we don't have any assurance that we could last one more step.
-The discount factor usually depends on the domain and the goal that we want to achieve: a long-term goal will require a value of $\gamma$ close to $1$.
+The discount factor usually depends on the domain and the goal that we want to achieve: a long-term goal will require a value of $\gamma \simeq 1$.
 
 
 The actual value of the discounted cumulative reward depends on the interaction of the agent over a trajectory. Many factors come into play to influence this objective function, most importantly the behaviour of the agent (e.g. which actions the agent chooses). The way an agent interacts with the environment and hence characterizes its behaviour is defined by the policy function:
@@ -277,7 +291,7 @@ V^{t+1}(s) = \max_a \left\{ \rfunc(s,a) + \gamma\int_{\sspace} \tfunc(s'|s,a)V^{
 
 The above equation is known in literature as Bellman Optimality Equation, and is guaranteed to converge to the optimal state-value function $V^*(s)$ in infinite norm~\cite{BELLMAN1958228}. Value iteration effectively combines one sweep of policy evaluation and one sweep of policy improvement, removing any intermediate policy representation. Note that iterating solely on the value function may end up in not feasible intermediate policies.
 
-\begin{algorithm}
+\begin{algorithm}[t]
 \caption{Value iteration algorithm}
 \begin{algorithmic}
 \State Initialize $V^0$ arbitrarily
