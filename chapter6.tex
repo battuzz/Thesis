@@ -1,3 +1,11 @@
 \chapter{Conclusions}
 \label{ch:conclusion}
 \thispagestyle{empty}
+
+In this thesis, we built a new RL framework for safe learning that combines most of the results done in this field. We divided safety constraints in two families: type-I safety for the most critical situations where we must have guarantees at every policy update; type-II safety, instead, for less critical situations where the safety constraint can be guaranteed over a \textit{learning iteration}. 
+We then extended the results on performance improvement bounds from \cite{adaptive_batch,adaptive_step} on policy gradient with Gaussian policies to include an exploratory behaviour. We introduced a new quantity $\gradDelta(\vv^t, w^t)$ that was used as an alternative approach of $\nabla_w J(\vv^t, w^t)$ to handle exploration, that was able to tackle with some difficult problems (Mountain Car).\\
+We provided SEPG, a general algorithm that can be adapted to all the variants that were presented: Monotonic Improvement (MI), Lower-Bounded I (LB-I), Lower-Bounded II (LB-II), Low Variance (LV) and Zero Variance(ZV). The main idea was to give to the user the safety requirement it need, and no more. Finally, we evaluated these variants on continuous control tasks. These experiments showed that the algorithm effectively guarantee the imposed safety constraint and simultaneously allows for a more exploratory behaviour. \\
+More importantly, these algorithm adapt to the environment and represent a step towards policy gradient algorithms that can be employed efficiently and safely in real applications. \\
+Future works can focus on extending the theoretical guarantees to other classes of policies (\eg softmax for discrete MDPs). Another interesting approach, could be to automate the selection of other meta-parameters (such as the batch size \cite{adaptive_batch}) or budget-allocation strategies for SEPG. This could result in an even more domain-independent algorithm that can be really useful for real applications. Finally, another possible extension to this work can be to study new exploration techniques that safely explore the environment. 
+
+
