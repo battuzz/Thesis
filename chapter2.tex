@@ -2,13 +2,7 @@
 \label{ch:rl}
 \thispagestyle{empty}
 
-When we think about the nature of learning, the first thing that probably occurs to us is learning by examples, namely, learning from some interactions with the environment that builds up our experience. Since we were children, we started interacting with the environment: we take some action, we see its consequence and we repeat until we accomplish a goal (e.g. we start moving the feet and learn how to walk). 
-
-
-Reinforcement Learning (RL) is a field of Machine Learning that closely resembles how living beings learn in nature. In this work we will explore the computational approach to learning from interaction, by considering a simplified yet powerful mathematical model. The final result will be a function that maps states to actions, that tells us what to do, so as to maximize a reward signal. This reward signal is intended to give insights about \textit{what} is the goal to pursue but not \textit{how}. The learner is not told which actions to take, but rather it has to discover which actions are more valuable via trial and error, from experience \\
-This is not a trivial task, since actions can potentially have long-term effects. As a matter of facts, an action affects the following state, from where another action can lead to another state and so on, generating a sequence of causally related events. Delayed rewards and trial and error search are the two most important aspects of reinforcement learning, that make this problem both difficult and intriguing.
-
-We will formalize the problem of reinforcement learning using a model taken from dynamical systems theory called Markov decision process. This model is able to capture the interactions between the agent and the environment and will be described in details in \Cref{sec:mdp}. Next, three general methods to solve a MDP are presented in \Cref{sec:solve-mdp}: policy iteration, value iteration and policy search. We will briefly describe the former two methods, enough to introduce a policy search method called Policy Gradient, that is the main interest of this work. Policy Gradient methods will then be described in detail in \Cref{sec:policy-gradient}, including some aspects about gradient approximation, baselines and other more advanced refinements.
+In this chapter, we will formalize the problem of reinforcement learning using a model taken from dynamical systems theory called Markov decision process. This model is able to capture the main aspects that build an interaction between the agent and the environment: observations, actions and goal. This model will be described in details in \Cref{sec:mdp}. Next, three general methods to solve a MDP are presented in \Cref{sec:solve-mdp}: policy iteration, value iteration and policy search. We will briefly describe the former two methods, enough to introduce a policy search method called Policy Gradient, that is the main interest of this work. Policy Gradient methods will then be described in detail in \Cref{sec:policy-gradient}, including some aspects about gradient approximation, baselines and other more advanced refinements.
 
 
 
@@ -19,11 +13,11 @@ We will formalize the problem of reinforcement learning using a model taken from
 
 \section{Markov Decision Processes}
 \label{sec:mdp}
-In this section we will formalize the problem of reinforcement learning by defining a mathematical model called Markov decision process.\\
+In this section we will formalize the problem of reinforcement learning by defining a mathematical model called Markov decision process. For a complete treatment of reinforcement learning, refer to \cite{sutton1998reinforcement}\\
 The main aspects that we want to capture are the interactions between an agent and the environment over time. A learning agent must be able to sense the state of its environment and take some actions, while the environment itself receives the actions from the agent and reacts by changing the state and giving feedbacks to the agent,completing a cycle.
 The agent must also have a goal that is related to a state of the environment.\\
 Markov decision processes are intended to include just these three aspects -- sensation, action and goal -- in their simplest possible forms without trivializing any of them.
-
+\newpage
 \begin{definition}
 A Markov Decision Process (MDP) is a tuple $\left\langle \sspace, \aspace, \tfunc, \rfunc, \gamma, \mu \right\rangle$  where:
 \begin{itemize}
@@ -36,12 +30,24 @@ A Markov Decision Process (MDP) is a tuple $\left\langle \sspace, \aspace, \tfun
 \end{itemize}
 \end{definition}
 
-Note that the above definition of Markov Decision Process encodes two important properties:
+%At each time step $t$, the agent receives observations from the environment. From the current observations and previous interactions, the agent builds a representation of the current state of the environment, $s_t$ . Then, depending on $s_t$, it takes action $a_t$. Finally, it is given a (possibly negative) reward depending on how much its behaviour is compliant with the goal, in the form of a scalar signal $r_{t+1}$. 
+The dynamics of the environment, as represented by the agent, must satisfy two fundamental properties:
 \begin{itemize}
 \item[-] Stationarity: the transition function $\tfunc$ does not change over time.
-\item[-] Markov property: the transition function $\tfunc$ only depends on the previous state, not on the entire history.
+\item[-] Markov property: the transition function $\tfunc$ only depends on the previous state, not on the entire history of the interaction.
 \end{itemize}
-This mathematical model is very general and can be used to model different problems:
+
+An agent in a MDP starts from an initial state drawn from the probability distribution $\mu$, $s_0 \sim \mu$. From this state, the agent can interact with the environment by executing an action $a_0 \in \aspace$. The environment receives action $a_0$ and reacts to this stimulus by returning to the agent the next state $s_1$ drawn from the transition function $s_1 \sim \tfunc(s_0, a_0)$ and a scalar reward $r_1 = \rfunc(s_0, a_0)$. From its new observation, the agent can continue the interaction with the environment by choosing another action $a_1$ and so on until it reaches the goal. We define the  sequence of collected states, actions and rewards $\tau \sim s_0, a_0, s_1, r_1, a_1, s_2, \ldots$ as a trajectory. Sometimes we will refer to a trajectory with terms like 'sample' or 'experience', since the collected information will be used for the learning procedure.
+
+\Cref{fig:mdp-example} shows a graphical representation of a MDP. The circles represent the states of the environment and the arrows represent the transition probability of going from $s_t$ to $s_{t+1}$. Each state is associated a reward, depicted in red. \\
+Assuming that a student starts from Class 1, he can be distracted and use Facebook with probability $0.5$. Once he opens Facebook, the student will receive a reward of $-1$. From this state it would be hard to return to Class 1, because there is $0.9$ probability of continuing to use Facebook. The goal, in this simple example, is to go to sleep.\\
+This mathematical model is very general and can be used to model also more complex problems. 
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{pictures/mdp_agent_environment}
+\caption{Agent-environment loop}
+\end{figure}
 
 \begin{example}[Chess]
 The game of chess can be modelled as an MDP with a discrete state space that encodes the position of all the pieces in the checkerboard, a discrete action space encoding all the possible moves of the pieces, a deterministic transition function that follows the rules of the game and a (possible) reward function:
@@ -49,6 +55,7 @@ The game of chess can be modelled as an MDP with a discrete state space that enc
 \rfunc(s,a) = \begin{cases}\,\,\,\,\,1 & \textrm{Player wins} \\ -1 & \textrm{Player does not win} \end{cases}
 \end{equation*}
 \end{example}
+
 
 \renewcommand\windowpagestuff{\centering \includegraphics[width=5.5cm]{pictures/mountain_car} \captionof{figure}{Mountain car task}}
 \opencutright
@@ -85,13 +92,9 @@ This task can be modelled with a continuous multidimensional state space $\sspac
 \end{adjustbox}
 
 
-An agent in a MDP starts from an initial state drawn from the probability distribution $\mu$, $s_0 \sim \mu$. From this state, the agent can interact with the environment by executing an action $a_0 \in \aspace$. The environment receives action $a_0$ and reacts to this stimulus by returning to the agent the next state $s_1$ drawn from the transition function $s_1 \sim \tfunc(s_0, a_0)$ and a scalar reward $r_1 = \rfunc(s_0, a_0)$. From its new observation, the agent can continue the interaction with the environment by choosing another action $a_1$ and so on until it reaches the goal. We define the  sequence of collected states, actions and rewards $\tau \sim s_0, a_0, s_1, r_1, a_1, s_2, \ldots$ as a trajectory. Sometimes we will refer to a trajectory with terms like 'sample' or 'experience', since the collected information will be used for the learning procedure.
+%An agent in a MDP starts from an initial state drawn from the probability distribution $\mu$, $s_0 \sim \mu$. From this state, the agent can interact with the environment by executing an action $a_0 \in \aspace$. The environment receives action $a_0$ and reacts to this stimulus by returning to the agent the next state $s_1$ drawn from the transition function $s_1 \sim \tfunc(s_0, a_0)$ and a scalar reward $r_1 = \rfunc(s_0, a_0)$. From its new observation, the agent can continue the interaction with the environment by choosing another action $a_1$ and so on until it reaches the goal. We define the  sequence of collected states, actions and rewards $\tau \sim s_0, a_0, s_1, r_1, a_1, s_2, \ldots$ as a trajectory. Sometimes we will refer to a trajectory with terms like 'sample' or 'experience', since the collected information will be used for the learning procedure.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.9\textwidth]{pictures/mdp_agent_environment}
-\caption{Agent-environment loop}
-\end{figure}
+
 
 Intuitively, the agent aims at maximizing the sum of the collected rewards. However, this na\`ive sum of rewards do not apply if we consider infinite-horizon MDPs, which is a common setting in the literature. In fact, summing over potentially infinite-length trajectories will cause the cumulative reward to grow indefinitely and lose its original meaning. (e.g. earning +1 at every step will have the same meaning of earning +100 at every step, since over an infinite horizon they will both grow to infinity).\\
 For this reason, it is common to consider a generalized version where we apply a discount factor $\gamma$ to the immediate reward and consider the cumulative discounted reward:
@@ -114,7 +117,7 @@ Note that the naive cumulative reward can be obtained by setting $\gamma=1$, and
 \includegraphics[width=\textwidth]{pictures/mdp_policy}
 \caption{Visual representation of a (deterministic) policy}
 \end{subfigure}
-\caption{Representation of a simple MDP}
+\caption{Representation of a simple MDP} \label{fig:mdp-example}
 \end{figure}
 
 However, the addition of the discount factor has a well-known two-fold meaning: at a first glance, it represents how the agent is interested in future rewards. With $\gamma$ close to $0$, we have a myopic behaviour, where we are only interested in immediate rewards rather than long-term investments. With $\gamma$ close to $1$, instead, we are giving more value to long-term rewards. In the second place, $\gamma$ can also represent the probability that the simulation will continue for one more step. If $\gamma$ is low, we should strive to get as much as we can because we don't have any assurance that we could last one more step.
@@ -363,7 +366,7 @@ where $\Delta\boldsymbol{\Theta}$ contains the perturbations $\Delta\vtheta_i$ a
 This approach is general, as it does not require any specific knowledge about the system, and it is straightforward to apply, however in real systems it suffers from slow convergence and requires a huge number of sample trajectories.
 
 \paragraph{Likelihood ratio}
-Likelihood ratio methods \cite{Glynn:1990:LRG:84537.84552}, later refined with the REINFORCE trick~\cite{Williams1992}, use a different approach to estimate the policy gradient.\\
+Likelihood ratio methods \cite{Glynn:1990:LRG:84537.84552}, later refined with the REINFORCE trick~\cite{Williams92simplestatistical}, use a different approach to estimate the policy gradient.\\
 The REINFORCE trick employs this general identity:
 \[
 \nabla\log f = \frac{\nabla f}{f}
@@ -413,7 +416,7 @@ Another approach that was used to reduce the variance of the REINFORCE and G(PO)
 \begin{align*}
 \gradj &= \EV[\pi, \mu]{\elig Q^{\pi_{\vtheta}}(s,a)} \\&= \EV[\pi, \mu]{\elig \left( Q^{\pi_{\vtheta}}(s,a) - b \right)}
 \end{align*}
-for any action-independent value $b\in\mathbb{R}$~\cite{Williams1992}. Exploiting this result, we can find the baseline $b$ such that the variance of the estimator is minimized, yielding the following results for REINFORCE and G(PO)MDP as shown in~\cite{peters}:
+for any action-independent value $b\in\mathbb{R}$~\cite{Williams92simplestatistical}. Exploiting this result, we can find the baseline $b$ such that the variance of the estimator is minimized, yielding the following results for REINFORCE and G(PO)MDP as shown in~\cite{peters}:
 \begin{flalign*}
 &\textbf{REINFORCE:} && b = \frac{\left\langle \left(\sum_{k=0}^H \nabla_{\vtheta}\log\pi_{\vtheta}(a_k|s_k) \right)^2\sum_{l=0}^{H}\gamma^l\rfunc(s_l,a_l) \right\rangle}{\left\langle \left( \sum_{k=0}^H \nabla_{\vtheta}\log\pi_{\vtheta}(a_k|s_k) \right)^2 \right\rangle}, && \\
 &\textbf{G(PO)MDP:} && b_{\textrm{k}} = \frac{\left\langle \left(\sum_{k=0}^{\textrm{k}} \nabla_{\vtheta}\log\pi_{\vtheta}(a_k|s_k) \right)^2\gamma^{\textrm{k}}\rfunc(s_{\textrm{k}},a_{\textrm{k}}) \right\rangle}{\left\langle \left( \sum_{k=0}^{\textrm{k}} \nabla_{\vtheta}\log\pi_{\vtheta}(a_k|s_k) \right)^2 \right\rangle}.  &&

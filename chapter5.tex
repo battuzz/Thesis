@@ -6,10 +6,11 @@
 \fancyhead[RE]{\bfseries\leftmark}    
 \fancyhead[LO]{\bfseries\rightmark}  
 
-In \Cref{ch:balance} we have presented a new general framework for safe reinforcement learning that can be used to design safe constraints depending on the user needs. In particular, we presented five possible flavours of particular interest: \textbf{Monotonic Improvement} (MI) that gives the strictest guarantee and can be used in critical applications or when costs/risks are not modelled in the reward; \textbf{Lower Bounded I} (LB-I) that puts a lower bound on the performance corresponding to the initial policy and can be used when we have already a good initial policy but we want to improve it; \textbf{Lower Bounded II} (LB-II) that guarantees type-II safety over a learning iteration and can be used in an on-line scenario when we don't want to perform in average worse than the initial policy; \textbf{Low-Variance} (LV) that adds the possibility to test the quality of the target policy in conditions of lower variance; \textbf{Zero Variance} (ZV) where we sacrifice some guarantees and we test the deterministic controller that gives a more realistic evaluation of the target and possibly allows for a faster convergence speed.\\
-We have already described in details the general algorithm named Safely-Exploring Policy Gradient and how to adapt it to implement all the presented safety constraints in~\Cref{sec:algos}. 
+In \Cref{ch:balance} we have presented a new general framework for safe reinforcement learning that can be used to design safe constraints depending on the user needs. In particular, we presented five possible variants of particular interest: \textbf{Monotonic Improvement} (MI) that gives the strictest guarantee and can be used in critical applications or when costs/risks are not modelled in the reward; \textbf{Lower Bounded I} (LB-I) that puts a lower bound on the performance corresponding to the initial policy and can be used when we have already a good initial policy but we want to improve it; \textbf{Lower Bounded II} (LB-II) that guarantees type-II safety over a learning iteration and can be used in an on-line scenario when we don't want to perform worse than the initial policy in average; \textbf{Low-Variance} (LV) that adds the possibility to test the quality of the target policy in low-variance conditions (\eg a prototype); \textbf{Zero Variance} (ZV) where we sacrifice some guarantees and we test the deterministic controller, which gives a more realistic evaluation of the target policy and possibly allows for a faster convergence speed.\\
+In \Cref{sec:algos} we have described in details Safely-Exploring Policy Gradient (SEPG) and how to adapt it to implement such variants.
 
-In this chapter we will evaluate these variants on simulated continuous control tasks: in \Cref{sec:lqg} we will consider the linear-quadratic Gaussian (LQG) control problem. This is a well-known control for which a closed-form solution exists, that let us study better the behaviour of our algorithms. Then, in \Cref{sec:mountain} we will see consider the Mountain Car problem, that is a complex task that requires a careful exploration strategy. 
+
+In this chapter we will evaluate these variants on simulated continuous control tasks: in \Cref{sec:lqg} we will consider the linear-quadratic Gaussian (LQG) control problem. This is a well-known control task for which a closed-form solution exists, which let us study in more details the behaviour of our algorithms. Then, in \Cref{sec:mountain} we will consider the Mountain Car problem, which is a complex task that requires a careful exploration strategy. 
 
 
 \section{Linear Quadratic Gaussian Controller}\label{sec:lqg}
@@ -18,17 +19,18 @@ The linear-quadratic Gaussian (LQG) regulator problem~\cite{peters} is a continu
 \[
 s_{t+1}\sim \mathcal{N}(s_t + a_t, \eta_0^2),
 \]
-a Gaussian policy:
+where the next state is obtained by summing the action and some noise to the current state, a Gaussian policy:
 \[
 a_t \sim \mathcal{N}(\transpose{\vv}s, e^{2w}),
 \]
-and reward:
+and a reward function that depends on the distance to the goal and the magnitude of the action:
 \[
 r_t = -0.5(s_t^2 + a_t^2).
 \]
-Both action and state space are continuous and bounded in the interval $\sspace, \aspace \subseteq [-2, 2]$ and the initial state $s_0$ is drawn uniformly from $\sspace$. The goal of this task is to bring the state to zero by performing actions in the presence of noise. The action, though, has a cost that is reflected in the reward function. This poses a trade-off for the magnitude of the action: we want to reach the goal fast enough to avoid the penalization given by the distance to the goal, but slow enough to avoid a strong penalization on the action. 
+Both action and state space are continuous and bounded in the interval $\sspace, \aspace \subseteq [-2, 2]$ and the initial state $s_0$ is drawn uniformly from $\sspace$. The goal of this task is to bring the state to zero. \\
+The main difficulty of this task is reflected in the reward function that depends both on the state and action. This poses a trade-off on the magnitude of the action: we want to reach the goal fast enough to avoid the penalization given by the distance to the goal, but slow enough to avoid a strong penalization on the action. 
 
-This problem admits a closed-form solution for Gaussian policies linear in space. In all our experiments, we use a discount factor of $\gamma=0.99$, which gives an optimal parameter $\vv^* \approx -0.615$ corresponding to an expected deterministic performance $J(\vv^*, -\infty)\approx-7.753$. 
+This problem admits a closed-form solution for Gaussian policies linear in space. In all our experiments, we use a discount factor of $\gamma=0.99$, which gives an optimal parameter $\vv^* \approx -0.615$ corresponding to an expected deterministic performance $J(\vv^*, -\infty)\approx-7.753$. We always start from an initial policy with $\vv^0=-0.1$ \\
 The knowledge of the optimal policy $\vtheta^*$ gives us the possibility to compare the algorithms on how close they are w.r.t. the optimal solution.
 
 We will gradually present the results in this way: we will compare Monotonic Improvement (MI) with Lower Bounded I (LB-I) first, which are the two implementations of type-I safety. Next we will also add the other implementations and we will derive some considerations about the difference between type-I and type-II safety. Finally, we will compare Zero Variance (ZV) with some alternative implementations that simultaneously perform a $\vv$-update and a $w$-update, thus requiring less trajectories but provides no guarantees.
@@ -39,8 +41,9 @@ Here we want to focus between MI and LB-I. They both guarantee type-I safety con
 \[
 J(\vtheta^{t+1}) \geq \jbase
 \]
-for each update. The main difference is the value of the baseline: MI sets the baseline to be the performance of the policy at the previous update, while LB-I lower bounds the performance of the exploratory policy w.r.t. the initial policy, that is $J(\vtheta^t)\geq J(\vtheta^0)$ for each update.\\
-This adds a new degree of freedom that greatly increase the learning speed as shown in \Cref{fig:plot1}. In particular, MI can't afford to lose anything, while LB-I can afford to lose something, up to the advantage it has gained w.r.t. the baseline. The advantage can increase over time, allowing for even longer step sizes and thus faster convergence. We can see the increasing in the step size length in \Cref{fig:plot1-3}.
+for each update. The main difference is the value of the baseline: MI sets the baseline to be the performance of the policy at the previous update, while LB-I lower bounds the performance of the exploratory policy w.r.t. the initial policy, that is, $J(\vtheta^t)\geq J(\vtheta^0)$ for each update.\\
+This adds a new degree of freedom that greatly increase the learning speed as shown in \Cref{fig:plot1}. In particular, the advantage of LB-I is that it is not required to improve the solution on every step, but it can afford to lose up to $J(\vtheta^t) - J(\vtheta^0)$, that is, the advantage of the current policy w.r.t. the initial policy. This difference can be seen after some iterations of the algorithm, where LB-I's advantage over MI increases, allowing it to take even larger updates.\\
+Moreover, LB-I safely increase the exploration parameter $\sigma$ (\Cref{fig:plot1-2}) that further increase the convergence speed of the parameter $\vv^t$, as shown in \Cref{fig:plot1-3}.
 
 % PLOT 1
 \begin{figure}[t]
@@ -65,26 +68,26 @@ This adds a new degree of freedom that greatly increase the learning speed as sh
 \end{figure}
 
 \subsection{Type-II safety constraints}
-\Cref{fig:plot2} shows the behaviour of all the SEPG variants for type-II safety described in \Cref{sec:algos}. \\
-(a) shows the performance of the exploratory policies; (b) the evolution of $\sigma$ in the different variants; (c) the evolution of the mean parameter $\vv^t$; (d) the safety guarantee implemented; (e) the deterministic policy optimized by LV and ZV; (f) the evolution of the budget $B^t$. \\
-In particular, we identify the following interesting behaviours:
+In this section, we will compare the behaviour of all type-II variants of SEPG, shown in \Cref{fig:plot2}. \\
+Specifically, (a) shows the performance of the exploratory policies; (b) the evolution of $\sigma$ in the different variants; (c) the evolution of the mean parameter $\vv^t$; (d) the safety guarantee implemented; (e) the deterministic policy optimized by LV and ZV; (f) the evolution of the budget $B^t$. \\
+We identify the following interesting behaviours:
 \begin{itemize}
-\item 
-\item Contrary to type-I variants (MI, LB-I) that  tend to directly improve $J(\vtheta)$, type-II variants (LB-II, LV, ZV) invest the change in performance in the budget. This budget is then used to allow for more exploration and fixes an upper bound for bounded-worsening updates. 
+\item Contrary to type-I variants (MI, LB-I) that  tend to directly improve $J(\vtheta)$, type-II variants (LB-II, LV, ZV) invest the improvements in policy performance in the budget. This budget is then used to allow for more exploration and fixes an upper bound for bounded-worsening updates. 
 \item In \Cref{fig:plot2-4} we can see that the type-II safety guarantee
 \[
 \frac{1}{K}\sum_k \left(J(\vtheta^{k(t)}) + J(\vtarget[k(t)])\right)/2 \geq \jbase
 \]
 is satisfied. We have highlighted the performance of the baseline policy with a red dashed line. \\
-In particular note that they belong to different scales. This is due to the magnitude of the target policy: for LB-II we don't evaluate the target policy (since we set $\vtheta^t_T = \vtheta^t_E$); for LV we evaluate a target policy that is less stochastic than the exploratory policy, but it is still close to the exploratory policy; for ZV we evaluate the deterministic policy that has a higher value than the low-variance policy. This can be seen in \Cref{fig:plot2-5}. \\
-Moreover, we can see that they both end slightly below the baseline. This is due to two factors: the first is the approximate framework that adds some errors on our estimations. The second factor is related to the behaviour of the algorithm: as it is designed, the algorithm will try to spend all the available budget in bounded-worsening improvements. This is fine as long as new income is added to the budget, but when the parameter is close to the optimal value, it becomes hard to increase the budget. As it happens, the budget becomes slightly negative and the algorithm is not capable of restoring a positive value. 
+In particular note that they belong to different scales. This is due to the magnitude of the target policy: for LB-II we don't evaluate the target policy (since we set $\vtheta^t_T = \vtheta^t_E$); for LV we evaluate a target policy that is less stochastic than the exploratory policy, but it is still close to the exploratory policy; for ZV we evaluate the deterministic policy that has a higher performance than the low-variance policy. This can be seen in \Cref{fig:plot2-5}. \\
+Moreover, we can see that they both end slightly below the baseline. This is due to two factors: the first is the approximate framework that adds some errors on our estimations. The second factor is related to the behaviour of the algorithm: as it is designed, the algorithm will try to spend all the available budget in bounded-worsening improvements. This is fine as long as new income is added to the budget. When the parameter is close to the optimal value, though, it becomes hard to increase the budget. As it happens, the budget becomes slightly negative and the algorithm is not capable of restoring a positive value for the budget. 
 
-\item The evolution of the performance measure $J(\vtheta_E)$ is of particular interest: it grows high at the beginning and then drops. This behaviour can be explained by looking at the evolution of $\sigma$ and $\vv^t$: as $\vv$ converges toward the optimal value, the performance of the policy increases and some of the gained budget is spent in raising $\sigma$. However, when $\vv$ is close to the optimum, there are no big improvements reflected in the performance measure, so the budget is spent solely on exploration. This comes to an increase in the exploration cost, which explains the drop in $J(\vtheta^t_E)$. Note that for ZV the drop is also related with the gain in the target policy.
+\item The evolution of the performance measure $J(\vtheta_E)$ is of particular interest: it grows high at the beginning and then drops. This behaviour can be explained by looking at the evolution of $\sigma$ and $\vv^t$: as $\vv$ converges toward the optimal value, the performance of the policy increases and some of the gained budget is spent in raising $\sigma$. However, when $\vv$ is close to the optimum, there are no big improvements reflected in the performance measure, hence the budget is spent solely on exploration. This increases the exploration costs and explains the drop in the policy performance $J(\vtheta^t_E)$. Note that for ZV the drop is also related with the gain in the target policy.
 
 \item The evaluation of the target policy for LV and ZV is shown in \Cref{fig:plot2-5}. The performance of the deterministic policy optimized by ZV ends very close to the optimum $J(\vv^*,-\infty)\approx-7.753$. The low-variance target policy optimized by LV, instead, is very similar to the exploratory policy $\vtheta^t_E$. This is because the bounds used to compute the low-variance policy don't allow for a significant change of the variance, which remains only slightly reduced. 
 \end{itemize}
 
-In general we can see that ZV converges faster to the optimal value $\vv^*$. The main reason is the increased information and budget given by the evaluation of the deterministic policy. The low-variance policy evaluated by LV helps a bit compared to LB-II. All these variants are notably faster than type-I implementations described before.
+In general we can see that ZV converges faster to the optimal value $\vv^*$ than the other type-II variants. The main reasons is that the evaluation of the deterministic policy increases the amount of available budget. The same behaviour can be seen for LV, but, since the low-variance policy still remain close to the stochastic one, the improvement is much less than ZV. \\
+All these variants are notably faster than type-I implementations described before.
 
 % PLOT 2
 \begin{figure}[t!]
@@ -122,15 +125,15 @@ In general we can see that ZV converges faster to the optimal value $\vv^*$. The
 \end{subfigure}
 \end{subfigure}
 
-\caption{Comparison between all SEPG variants presented in \Cref{sec:algos}. Depending on the user needs, one can choose between different safe approaches. }
+\caption{Comparison between all SEPG variants presented in \Cref{sec:algos}. Depending on the user needs, the user can choose between different safe approaches. }
 \label{fig:plot2}
 \end{figure}
 
 Next, we compare the convergence speed of these variants with other state-of-the-art non-safe approaches.
-\Cref{exp:convergence-speed} shows a 95\%-confidence upper bound  on the absolute error $|\vv - \vv^*|$ after 10,000 iterations for different initial values of $\sigma$. We compare our algorithms to REINFORCE with constant step size ($\alpha = \beta = const$) and Adam~\cite{kingma2014adam}. The initial value of $\vv$ is set to be $\vv=-0.1$ in all cases. \\
-Our algorithms, of course, cannot outperform all possible combinations of manually-chosen step size, but we can see that our algorithms give comparable convergence speed without the need of tuning the step-size. This is an important aspect that allows SEPG to be more domain-independent.
+\Cref{exp:convergence-speed} shows a 95\%-confidence upper bound  on the absolute error $|\vv - \vv^*|$ after 10,000 iterations for different initial values of $\sigma$. We compare our algorithms to REINFORCE with constant step size ($\alpha = \beta = const$) and Adam~\cite{kingma2014adam}, an algorithm that starts from an initial learning rate, and subsequently adapts to the state of the optimization. \\
+Our algorithms, of course, cannot outperform all possible combinations of manually-chosen step sizes, but we can see that our algorithms give comparable convergence speed without the need of tuning the step-size. This is an important aspect that allows SEPG to be more domain-independent.
 
-In particular, we note that our algorithms perform better with higher initial values of $\sigma$. A possible explanation for this behaviour is that the bounds used to compute the optimal step size $\overline{\alpha}$ and $\overline{\beta}$ highly depend on $\sigma$: higher values make the bounds less tight, thus speeding up convergence speed.\\
+In particular, we note that our algorithms perform better with higher initial values of $\sigma$. A possible explanation for this behaviour is that the bounds used to compute the optimal step size $\overline{\alpha}$ and $\overline{\beta}$ highly depend on $\sigma$: higher values of $\sigma$ make the bounds less tight, thus speeding up convergence speed.\\
 Moreover, we can see that the Monotonic Improvement (MI) case is in general the slowest to converge due to the more conservative behaviour of the algorithm. This is the main reason that led the investigation of other types of safety constraints that better fit the user needs.
 
 
@@ -159,8 +162,8 @@ $\sigma$ & 1e-4 & 1e-05 & 1e-06 & 1e-4 & 1e-5 & 1e-6 & MI & LB-I & LB-II & LV & 
 
 As we have introduced in the end of \Cref{sec:algos}, a possible way to further speed up the convergence speed of our algorithms is to reuse the collected trajectories and simultaneously perform $\vv$-update and $w$-update. This comes to the cost of no strict guarantees that the algorithm will satisfy the safety constraint. We tested this variant called SEPG-SIM in the same setting.
 
-A problem that naturally arise when considering simultaneous updates is the allocation of the budget, that is how to split the budget between the $\vv$-update and the $w$-update. We didn't study this allocation issue in-depth, so we have considered fixed-strategies: at every iteration, the budget $B$ is split so that $\nu B$ is used for the $\vv$-update and $(1-\nu)B$ is used for the $w$-update. Specifically, we tested values for $\nu \in \{\nicefrac{1}{3}, \nicefrac{1}{2}, \nicefrac{2}{3}\}$.\\
-The results are shown in \Cref{fig:plot3}: as expected the simultaneous approach required less samples to converge. Moreover, the safety constraint is still satisfied despite this approximation. Finally, we can see the difference between the different budget allocation strategies in \Cref{fig:plot3-3}: allocating more budget to the $w$-update (SIM-$\nicefrac{1}{3}$) gives a faster convergence for the parameter $\vv^t$. This aspect further investigates the strict relation between exploration and exploitation, where the former influences the latter in a non-trivial way.
+A problem that naturally arise when considering simultaneous updates is the allocation of the budget, that is, how to split the budget between the $\vv$-update and the $w$-update. We didn't study this allocation issue in-depth, but we have only considered a fixed-strategy: at every iteration, the budget $B$ is split so that $\nu B$ is used for the $\vv$-update, and $(1-\nu)B$ is used for the $w$-update. Specifically, we tested values for $\nu \in \{\nicefrac{1}{3}, \nicefrac{1}{2}, \nicefrac{2}{3}\}$.\\
+The results are shown in \Cref{fig:plot3}: as expected the simultaneous approach required less samples to converge. Moreover, the safety constraint is still satisfied despite this approximation. Finally, we can see the difference between the different budget allocation strategies in \Cref{fig:plot3-3}: allocating more budget to the $w$-update (SIM-$\nicefrac{1}{3}$) gives a faster convergence for the parameter $\vv^t$. This aspect shows the strict relation between exploration and exploitation, where the former influences the latter in a non-trivial way.
 
 
 
@@ -201,16 +204,13 @@ The results are shown in \Cref{fig:plot3}: as expected the simultaneous approach
 We also tested our algorithms on Mountain Car problem (in the \textit{openai/gym} implementation) to show the advantages of our algorithm in a situation where exploration is particularly important. 
 
 
-The problem is as follows: a car is placed between two hills and can move left or right. The goal is to reach the top of the right hill, but the engine is not powerful enough to directly climb the hill, so the optimal solution is to gain velocity by first going in the opposite direction. This task can be modelled with a continuous state space $\sspace \in [-2, 2]$, continuous action representing the force applied to the car $\aspace \in [-1, 1]$, deterministic transition function given by physics laws and the following reward function:
-
+The problem is as follows: a car is placed between two hills and can move left or right. The goal is to reach the top of the right hill, but the engine is not powerful enough to directly climb the hill, so the optimal solution is to gain momentum by first going in the opposite direction. This task can be modelled with a continuous state space $\sspace \in [-2, 2]$, a continuous action representing the force applied to the car $\aspace \in [-1, 1]$, a deterministic transition function given by the laws of physics and the following reward function:
 \begin{equation*}
 \rfunc(s,a) = \begin{cases} +100 & \textrm{when } s \geq 1.5 \\ -a^2 & \textrm{otherwise} \end{cases}
 \end{equation*}
 
-This problem is particularly difficult for its exploration need: the agent, in fact, must explore very much in order to see the goal at least once, but this comes with a cost associated to the square of the taken action.
-
-
-We set $\sigma^0 = 0.2$, which is not enough to reach the goal. By providing a nominal initial budget ($B^0 = 1$), our method SEPG-ZV starts investing more and more in exploration until it sees the goal, and is ultimately able to solve the problem. An important role is played by following the gradient $ \gradDelta(\vv^t, w^t)$ instead of the na\`ive gradient $\nabla_w J(\vv^t, w^t)$. \\
+This problem is particularly difficult for its exploration need: the agent must explore in order to reach the goal at least once before actually solving the problem. \\
+We set $\sigma^0 = 0.2$, which is not enough to reach the goal. By providing a nominal initial budget ($B^0 = 1$), our method SEPG-ZV starts investing more and more in exploration until it reaches the goal, and is ultimately able to solve the problem. An important role is played by following the gradient $ \gradDelta(\vv^t, w^t)$ instead of the na\`ive gradient $\nabla_w J(\vv^t, w^t)$. \\
 \Cref{fig:mc} shows performance (on the left) and the policy variance (on the right) of our experiment. As we can see, a na\`ive gradient ascent update (Adam in the picture, but the same can be shown for any reasonable fixed step size), is not far-sighted enough to see any advantage in increasing $\sigma$, and gets stuck immediately. 
 
 

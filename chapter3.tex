@@ -164,8 +164,6 @@ The second algorithm proposed by Pirotta et al. is called Multiple-parameter Saf
 \]
 Where $\alpha(s)\in [0,1] \forall s$ is a per-state convex-combination coefficient. This more general variant proved to be only slightly better than USPI in some domain but it often happened that the policy improvement bound found by MSPI was lower than the one of USPI, because the former, due to its increased complexity, optimizes the bound in \Cref{th:pirotta-bound2}, while USPI can optimize the tighter bound in \Cref{th:pirotta-bound1}
 
-[TODO REPORT SOME RESULTS?]
-
 \section{Adaptive Step Size For PG}
 \label{sec:ass}
 Pirotta et al.~\cite{adaptive_step} further developed their work on safe policy iteration and adapted the bound from~\cite{safe_iteration} and described in~\Cref{sec:spi} to be used with policy gradient methods.\\

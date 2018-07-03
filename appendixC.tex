@@ -87,12 +87,3 @@ The gradients \wrt $w$ are scalar, but we keep the norm notation for the sake of
 	where $\lambda_{w}=\sqrt{1 - \nicefrac{\nu C}{C_{\text{max}}^{w}}}$, are enough to guarantee $J(\vv^{t+1},w^t) - J(\vv^{t+1},w^t)\geq \nu C$ with probability at least $(1-\delta)^m$.
 \end{restatable}
 
-Finally, it should be noted that also performance $J(\vtheta)$ must be estimated from sample trajectories, so the budget employed in Algorithm \ref{alg:adaptive_exp} is also an estimate. We do not elaborate on this aspect, since this kind of stochasticity is inherent in the RL process. We just remark how even the more exploratory variants of SEPG tend to keep the total average return $[J(\vtheta^t) + J(\vtarget)]/2$ above the baseline.
-Here we show the behavior of SEPG-ZV on the LQG task:
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.6\textwidth, height=0.48\textwidth]{./pictures/PlotDet4.pdf}
-\caption{Behavior of SEPG-ZV on LQG.} 
-\label{fig:ZV_LQG}
-\end{figure} 
-
