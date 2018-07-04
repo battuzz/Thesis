@@ -13,7 +13,7 @@
 \usepackage{amsthm}
 \usepackage{xargs}
 \usepackage{cleveref}
-\usepackage{algorithm}
+\usepackage[chapter]{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{units}
@@ -62,6 +62,7 @@
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assumption}[theorem]{Assumption}
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[chapter]
@@ -218,7 +219,14 @@
  
 
 
-\tableofcontents 
+\tableofcontents \newpage \smartdoubleflush
+
+\listoffigures \smartdoubleflush
+\addcontentsline{toc}{chapter}{List of figures}
+
+\listofalgorithms %\smartdoubleflush
+\addcontentsline{toc}{chapter}{List of algorithms}
+
 \smartdoubleflush
 
 \include{chapter1} \smartdoubleflush
@@ -241,7 +249,7 @@
 
 \include{appendixA} \smartdoubleflush
 \include{appendixB} \smartdoubleflush
-\include{appendixC} %\smartdoubleflush
+%\include{appendixC} %\smartdoubleflush
 %\include{appendixD}
 \end{document}
 

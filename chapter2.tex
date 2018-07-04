@@ -1,6 +1,6 @@
 \chapter{Reinforcement Learning}
 \label{ch:rl}
-\thispagestyle{empty}
+%\thispagestyle{empty}
 
 In this chapter, we will formalize the problem of reinforcement learning using a model taken from dynamical systems theory called Markov decision process. This model is able to capture the main aspects that build an interaction between the agent and the environment: observations, actions and goal. This model will be described in details in \Cref{sec:mdp}. Next, three general methods to solve a MDP are presented in \Cref{sec:solve-mdp}: policy iteration, value iteration and policy search. We will briefly describe the former two methods, enough to introduce a policy search method called Policy Gradient, that is the main interest of this work. Policy Gradient methods will then be described in detail in \Cref{sec:policy-gradient}, including some aspects about gradient approximation, baselines and other more advanced refinements.
 
@@ -13,7 +13,7 @@ In this chapter, we will formalize the problem of reinforcement learning using a
 
 \section{Markov Decision Processes}
 \label{sec:mdp}
-In this section we will formalize the problem of reinforcement learning by defining a mathematical model called Markov decision process. For a complete treatment of reinforcement learning, refer to \cite{sutton1998reinforcement}\\
+In this section we will give a formal definition of reinforcement learning by defining a mathematical model called Markov decision process. For a complete treatment of reinforcement learning, refer to \cite{sutton1998reinforcement}\\
 The main aspects that we want to capture are the interactions between an agent and the environment over time. A learning agent must be able to sense the state of its environment and take some actions, while the environment itself receives the actions from the agent and reacts by changing the state and giving feedbacks to the agent,completing a cycle.
 The agent must also have a goal that is related to a state of the environment.\\
 Markov decision processes are intended to include just these three aspects -- sensation, action and goal -- in their simplest possible forms without trivializing any of them.
@@ -39,9 +39,9 @@ The dynamics of the environment, as represented by the agent, must satisfy two f
 
 An agent in a MDP starts from an initial state drawn from the probability distribution $\mu$, $s_0 \sim \mu$. From this state, the agent can interact with the environment by executing an action $a_0 \in \aspace$. The environment receives action $a_0$ and reacts to this stimulus by returning to the agent the next state $s_1$ drawn from the transition function $s_1 \sim \tfunc(s_0, a_0)$ and a scalar reward $r_1 = \rfunc(s_0, a_0)$. From its new observation, the agent can continue the interaction with the environment by choosing another action $a_1$ and so on until it reaches the goal. We define the  sequence of collected states, actions and rewards $\tau \sim s_0, a_0, s_1, r_1, a_1, s_2, \ldots$ as a trajectory. Sometimes we will refer to a trajectory with terms like 'sample' or 'experience', since the collected information will be used for the learning procedure.
 
-\Cref{fig:mdp-example} shows a graphical representation of a MDP. The circles represent the states of the environment and the arrows represent the transition probability of going from $s_t$ to $s_{t+1}$. Each state is associated a reward, depicted in red. \\
-Assuming that a student starts from Class 1, he can be distracted and use Facebook with probability $0.5$. Once he opens Facebook, the student will receive a reward of $-1$. From this state it would be hard to return to Class 1, because there is $0.9$ probability of continuing to use Facebook. The goal, in this simple example, is to go to sleep.\\
-This mathematical model is very general and can be used to model also more complex problems. 
+\Cref{fig:mdp-example} shows a graphical representation of a MDP. The circles represent the states of the environment and the arrows represent the transition probability of going from $s_t$ to $s_{t+1}$. Each state is associated with a reward, depicted in red. \\
+Assuming that a student starts from Class 1, he can be distracted and use the phone to access Facebook with probability $0.5$. If this happens, the environment will transition to the new state and the student will receive a reward of $-1$. From this new state it would be hard for the student to return to Class 1, because there is a $0.9$ probability of continuing to use Facebook (and receiving a negative reward). The goal, in this simple example, is to go to sleep.\\
+This mathematical model is very general and can be used also to model more complex problems. 
 
 \begin{figure}[t]
 \centering
@@ -271,12 +271,12 @@ This approach, though, suffer from the following limitations:
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{pictures/policy_improvement3}
-\caption{Visualization of the policy iteration algorithm. Starting from a policy $\pi^0$, we iteratively apply an evaluation and an improvement step, until we converge to the optimal action-value function $Q^*(s,a)$ and optimal policy $\pi^*$.}
+\caption[Visualization of policy iteration algorithm.]{Visualization of the policy iteration algorithm. Starting from a policy $\pi^0$, we iteratively apply an evaluation and an improvement step, until we converge to the optimal action-value function $Q^*(s,a)$ and optimal policy $\pi^*$.}
 \label{fig:policy-iteration}
 \end{figure}
 
 \begin{algorithm}[t]
-\caption{Policy iteration algorithm}\label{alg:policy-iteration}
+\caption[Policy iteration algorithm]{Policy iteration algorithm}\label{alg:policy-iteration}
 \begin{algorithmic}
 \State Initialize $\pi^0$ arbitrarily
 \For{t=0,1,2$\ldots$ until convergence}
@@ -399,7 +399,7 @@ This estimator was found to have lower variance than the REINFORCE estimator \ci
 
 \subsection{Baselines}
 \begin{algorithm}[t]
-\caption{REINFORCE with baseline}
+\caption{REINFORCE algorithm with baseline}
 \label{alg:reinforce-baseline}
 \begin{algorithmic}
 \State Initialize $\vtheta \in \Theta$ randomly

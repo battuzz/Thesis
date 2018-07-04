@@ -9,3 +9,6 @@
 *.bbl
 *.ps
 *.gz
+*.loa
+*.lof
+*.lot

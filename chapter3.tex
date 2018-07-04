@@ -1,6 +1,6 @@
 \chapter{Safe Policy Improvement}
 \label{ch:safepg}
-\thispagestyle{empty}
+%\thispagestyle{empty}
 
 In this chapter, we will describe some problems that can arise from RL techniques and why it is important to develop safe learning algorithms. \\
 We will start with the motivation of safe policy improvement in \Cref{sec:whysafety}, then dive into the details of several methods to address this problem. We will start from Conservative Policy Iteration (CPI)~\cite{Kakade02approximatelyoptimal}, in \Cref{sec:cpi}, that is considered one of the seminal works in this field. This work, in fact, sets the basis for several further developments. Pirotta et al.~\cite{safe_iteration} studied a more general bound for policy iteration, described in \Cref{sec:spi}, that was later applied to policy gradient methods~\cite{adaptive_step} (\Cref{sec:ass}). On this line of research, Papini et al.~\cite{adaptive_batch} considered also an adaptive batch size, as explained in \Cref{sec:abs}. Following a different approach, Shulman et al.~\cite{trpo} extended the result from CPI and developed a general algorithm called Trust Region Policy Optimization (TRPO), as described in \Cref{sec:trpo}. Finally, in \Cref{sec:other-safe}, we will briefly describe other approaches to safe policy improvements that no longer require monotonic improvement.
@@ -326,8 +326,7 @@ where $C = \frac{4\epsilon\gamma}{(1-\gamma)^2}$ and $\epsilon = \max_{s,a}|A_\p
 \end{theorem}
 
 \begin{algorithm}[!t]
-\caption{Policy iteration algorithm guaranteeing non-
-decreasing expected return $J$}
+\caption[PI algorithm guaranteeing non-decreasing expected return $J$.]{Policy iteration algorithm guaranteeing non-decreasing expected return $J$}
 \label{alg:trpo-iteration}
 \begin{algorithmic}
 \State Initialize $\pi_0$

@@ -11,7 +11,7 @@
 %\tikzset{>={Latex[length=3mm]}}
 
 \begin{document}
-\begin{tikzpicture}
+\begin{tikzpicture}[>= latex]
 
 \def\polelength{3}
 \def\angle{-13}
@@ -19,24 +19,31 @@
 \def\radiusone{2.5}
 \def\radiustwo{4}
 
-\draw[-,thick] (-3,0) -- (3,0);
+%\draw[-,thick] (-3,0) -- (3,0);
 \draw[-,fill=black] (-1,0) rectangle(1,\poleheight) {};
 
 
-\draw[-,dashed,rotate around={\angle:(0,{0.5\poleheight})}] (0,{0.5\poleheight}) -- (0,{\polelength + \poleheight + 1});
+
 \draw[-,fill=gray,rotate around={\angle:(0,{0.5\poleheight})}] (-0.1,{0.5\poleheight}) rectangle(0.1,{\poleheight + \polelength}) {};
+\draw[-,dashed,rotate around={\angle:(0,{0.5\poleheight})}] (0,{0.5\poleheight}) -- (0,{\polelength + \poleheight + 1});
+
 
 \draw[-,dashed] (0,0) -- (0,{\polelength+\poleheight+1});
 \draw[-,fill=brown] (0,{0.5\poleheight}) circle(0.1);
 
 %\draw[->] ({3*sin(13)},{\poleheight/2 + 3*cos(\angle)}) -- (0,{3+\poleheight/2});
-\draw[<-] ({\radiusone*sin(-\angle)},{\poleheight/2 + \radiusone*cos(\angle)}) arc ({90+\angle}:90:{\radiusone}) node[midway, above]{$\theta$};
+\draw[<->] ({\radiusone*sin(-\angle)},{\poleheight/2 + \radiusone*cos(\angle)}) arc ({90+\angle}:90:{\radiusone}) node[midway, above]{$\theta$};
 
-\draw[<-] ({\radiustwo*sin(-\angle)},{\poleheight/2 + \radiustwo*cos(\angle)}) arc ({90+\angle}:90:{\radiustwo}) node[midway, above]{$\dot{\theta}$};
+%\draw[<-] ({\radiustwo*sin(-\angle)},{\poleheight/2 + \radiustwo*cos(\angle)}) arc ({90+\angle}:90:{\radiustwo}) node[midway, above]{$\dot{\theta}$};
+
+
+\draw[<-] ({\radiustwo*sin(-\angle-6.5)},{\poleheight/2 + \radiustwo*cos(\angle+6.5)}) arc ({90+\angle+6.5}:{90+\angle-6.5}:{\radiustwo}) node[midway, above right]{$\dot{\theta}$};
+
+
 
 \draw[->] (1,{\poleheight/2}) -- (2,{\poleheight/2}) node[midway,above]{$\dot{x}$};
 
-\draw[->] (1,0) -- (3,0) node[left=5pt,above]{$x$};
+\draw[->, thick] (-2.5,0) -- (2.5,0) node[above left]{$x$};
 
 \end{tikzpicture}
 \end{document}

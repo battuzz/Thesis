@@ -1,6 +1,6 @@
 \chapter{Experimental analysis}
 \label{ch:experim}
-\thispagestyle{empty}
+%\thispagestyle{empty}
 
 \fancyhead[LE,RO]{\bfseries\thepage}                               
 \fancyhead[RE]{\bfseries\leftmark}    
@@ -63,7 +63,7 @@ Moreover, LB-I safely increase the exploration parameter $\sigma$ (\Cref{fig:plo
 \includegraphics[width=\textwidth]{./pictures/plots/plot3.pdf}
 \caption{Convergence speed of the Gaussian mean parameter $\vv^t$} \label{fig:plot1-3}
 \end{subfigure}
-\caption{Comparison between MI and LB-I implementations. The less stringent guarantees given by LB-I allows for a faster convergence speed of the mean parameter $\vv^t$ and an increase in exploration. }
+\caption[Comparison between MI and LB-I implementations.]{Comparison between MI and LB-I implementations. The less stringent guarantees given by LB-I allows for a faster convergence speed of the mean parameter $\vv^t$ and an increase in exploration. }
 \label{fig:plot1}
 \end{figure}
 
@@ -125,7 +125,7 @@ All these variants are notably faster than type-I implementations described befo
 \end{subfigure}
 \end{subfigure}
 
-\caption{Comparison between all SEPG variants presented in \Cref{sec:algos}. Depending on the user needs, the user can choose between different safe approaches. }
+\caption[Comparison between SEPG type-II variants.]{Comparison between SEPG type-II variants presented in \Cref{sec:algos}. Depending on the user needs, the user can choose between different safe approaches. }
 \label{fig:plot2}
 \end{figure}
 
@@ -154,7 +154,7 @@ $\sigma$ & 1e-4 & 1e-05 & 1e-06 & 1e-4 & 1e-5 & 1e-6 & MI & LB-I & LB-II & LV & 
 \bottomrule
 \end{tabular}
 }
-\caption{Upper bound confidence intervals at 95\% of $|\vv - \vv^*|$ after 10,000 iterations.}\label{exp:convergence-speed}
+\caption[Upper bound confidence interval for LQG problem.]{Upper bound confidence intervals at 95\% of $|\vv - \vv^*|$ after 10,000 iterations.}\label{exp:convergence-speed}
 \end{table}
 
 
@@ -193,7 +193,7 @@ The results are shown in \Cref{fig:plot3}: as expected the simultaneous approach
 \end{subfigure}
 \end{subfigure}
 
-\caption{Comparison between ZV and an alternative variant of SEPG (SIM-$\nu$) with simultaneous updates. The budget is split in this way: $\nu B$ for the $\vv$-update and $(1-\nu)B$ for the $w$-update. }
+\caption[Comparison between ZV and SIM-$\nu$.]{Comparison between ZV and an alternative variant of SEPG (SIM-$\nu$) with simultaneous updates. The budget is split in this way: $\nu B$ for the $\vv$-update and $(1-\nu)B$ for the $w$-update. }
 \label{fig:plot3}
 \end{figure}
 
