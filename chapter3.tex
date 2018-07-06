@@ -35,7 +35,7 @@ The proposed methods below will consider this latter monotonic improvement case,
 \label{sec:cpi}
 Kakade and Langford \cite{Kakade02approximatelyoptimal} proposed a novel solution to guarantee monotonic improvement in a policy iteration method. They faced the policy oscillation problem by limiting the magnitude of the policy updates in the following form:
 \begin{equation}
-\pi' = (1-\alpha )\pi + \alpha\overline{\pi} \label{eq:kakade-update}
+\pi' = (1-\alpha )\pi + \alpha\overline{\pi}, \label{eq:kakade-update}
 \end{equation}
 where the current policy $\pi$ is updated with a convex combination between the current policy $\pi$ and the greedy policy $\overline{\pi}$ with a factor $\alpha \in [0,1]$, also called learning factor.
 When $\alpha = 1$ we have the usual policy iteration as described in \Cref{ch:rl}. This update is not guaranteed to be safe in general. Kakade considered a conservative approach to safety by choosing $\alpha < 1$ and making smaller updates that guarantee an improvement.
@@ -44,15 +44,15 @@ A first result achieved by Kakade is summarized in \Cref{th:kakade1}:
 \label{th:kakade1}
 Assuming a policy update of the form~\ref{eq:kakade-update} in a policy iteration setting, the following performance improvement is guaranteed for all $\alpha \in [0,1]$:
 \begin{equation}
-J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{\alpha}{1 - \gamma}\left( \poladv[\pi, \mu][\overline{\pi}] - \frac{2\alpha \gamma \epsilon}{1 - \gamma (1 - \alpha)} \right) \label{eq:kakade-improvement}
+J_{\mu}(\pi') - J_{\mu}(\pi) \geq \frac{\alpha}{1 - \gamma}\left( \poladv[\pi, \mu][\overline{\pi}] - \frac{2\alpha \gamma \epsilon}{1 - \gamma (1 - \alpha)} \right), \label{eq:kakade-improvement}
 \end{equation}
-Where:
+where:
 \begin{equation}
 \poladv[\pi, \mu][\overline{\pi}] = \EV[s\sim d_{\pi, \mu}]{ \EV[a\sim\overline{\pi}]{A_{\pi}(s,a)}}
 \end{equation}
 is the policy advantage function and
 \begin{equation}
-\epsilon = \max_s \left| \EV[a\sim\overline{\pi}]{A_{\pi}(s,a)} \right|
+\epsilon = \max_s \left| \EV[a\sim\overline{\pi}]{A_{\pi}(s,a)} \right|.
 \end{equation}
 \end{theorem}
 
@@ -89,7 +89,7 @@ It is also useful to report a notable and general result from Kakade, 2002 that 
 \begin{theorem}[Lemma 6.1 from Kakade 2002]\label{th:kakade-lemma6.1}
 For any policies $\tilde{\pi}$ and $\pi$ and any starting state distribution $\mu$,
 \begin{equation}
-J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}, d_{\tilde{\pi}, \mu}]{A_{\pi}(s,a)} 
+J_{\mu}(\tilde{\pi}) - J_{\mu}(\pi) = \frac{1}{1-\gamma}\EV[(a,s)\sim\tilde{\pi}, d_{\tilde{\pi}, \mu}]{A_{\pi}(s,a)}.
 \end{equation} 
 \end{theorem}
 
@@ -147,11 +147,11 @@ If $\poladv[\pi, \mu][\overline{\pi}] \geq 0$ then, using update rule \ref{eq:ka
 \begin{itemize}
 \item $\alpha^* \leq 1$: the following policy improvement is guaranteed:
 \[
-J_\mu^{\pi'} - J_\mu^\pi \geq \frac{{\poladv[\pi, \mu][\pi']}^2}{2\gamma D_\infty^{\pi, \overline{\pi}}\Delta A_\pi^{\overline{\pi}}}
+J_\mu^{\pi'} - J_\mu^\pi \geq \frac{{\poladv[\pi, \mu][\pi']}^2}{2\gamma D_\infty^{\pi, \overline{\pi}}\Delta A_\pi^{\overline{\pi}}}.
 \]
 \item $\alpha^* > 1$: we have a full update toward $\overline{\pi}$ and the guarantee from \Cref{th:pirotta-bound1} setting $\pi_b = \pi$:
 \begin{equation}
-J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\poladv[\pi, \mu][\overline{\pi}]}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi, \pi'}} \frac{\Delta A_{\pi}^{\pi'}}{2}
+J_{\mu}(\pi') - J_\mu(\pi) \geq \frac{\poladv[\pi, \mu][\overline{\pi}]}{1-\gamma} - \frac{\gamma}{(1-\gamma)^2}{D_\infty^{\pi, \pi'}} \frac{\Delta A_{\pi}^{\pi'}}{2}.
 \end{equation}
 \end{itemize}
 \end{theorem}
@@ -160,9 +160,9 @@ The underlying algorithm for USPI is similar to \Cref{alg:kakade}, with the addi
 
 The second algorithm proposed by Pirotta et al. is called Multiple-parameter Safe Policy Improvement (MSPI) and employs a policy update rule of the following form:
 \[
-\pi'(a\mid s) = \alpha(s)\overline{\pi}(a\mid s) + (1-\alpha(s))\pi(a\mid s),\qquad\forall s,a
+\pi'(a\mid s) = \alpha(s)\overline{\pi}(a\mid s) + (1-\alpha(s))\pi(a\mid s),\qquad\forall s,a,
 \]
-Where $\alpha(s)\in [0,1] \forall s$ is a per-state convex-combination coefficient. This more general variant proved to be only slightly better than USPI in some domain but it often happened that the policy improvement bound found by MSPI was lower than the one of USPI, because the former, due to its increased complexity, optimizes the bound in \Cref{th:pirotta-bound2}, while USPI can optimize the tighter bound in \Cref{th:pirotta-bound1}
+where $\alpha(s)\in [0,1] \forall s$ is a per-state convex-combination coefficient. This more general variant proved to be only slightly better than USPI in some domain but it often happened that the policy improvement bound found by MSPI was lower than the one of USPI, because the former, due to its increased complexity, optimizes the bound in \Cref{th:pirotta-bound2}, while USPI can optimize the tighter bound in \Cref{th:pirotta-bound1}
 
 \section{Adaptive Step Size For PG}
 \label{sec:ass}
@@ -172,7 +172,7 @@ Their first contribution is a continuous version of the bound described in \Cref
 \begin{theorem}[Continuous MDP version of Corollary 3.6 in \cite{safe_iteration}]
 For any pair of stationary policies corresponding to parameters $\vtheta$ and $\vtheta'$ and for any starting state distribution $\mu$, the difference between the performance of policy $\pi_{\vtheta'}$ and $\pi_{\vtheta}$ can be bounded as follows:
 \[
-J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{1-\gamma}\int_{\sspace} d_\mu^{\pi_{\vtheta}}(s)A_{\pi_{\vtheta}}^{\pi_{\vtheta'}}(s)\de s - \frac{\gamma}{2(1-\gamma)^2}\norm[\infty]{\pi_{\vtheta'} - \pi_{\vtheta}}^2\norm[\infty]{Q^{\pi_{\vtheta}}}
+J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{1-\gamma}\int_{\sspace} d_\mu^{\pi_{\vtheta}}(s)A_{\pi_{\vtheta}}^{\pi_{\vtheta'}}(s)\de s - \frac{\gamma}{2(1-\gamma)^2}\norm[\infty]{\pi_{\vtheta'} - \pi_{\vtheta}}^2\norm[\infty]{Q^{\pi_{\vtheta}}},
 \]
 where $\norm[\infty]{Q^{\pi_{\vtheta}}}$ is the supremum norm of the Q-function: $\norm[\infty]{Q^{\pi_{\vtheta}}}=\sup\limits_{\substack{s\in\sspace, a\in\aspace}}Q^{\pi_{\vtheta}}(s,a)$
 \end{theorem}
@@ -190,7 +190,7 @@ Let the update of the policy parameters be $\vtheta'=\vtheta+\alpha\nabla_{\vthe
 &+ \frac{\alpha^2}{1-\gamma}\int_{\sspace} d_\mu^{\pi_{\vtheta}}(s) \int_{\aspace} \inf_{c\in (0,1)} \secorder Q^{\pi_{\vtheta}}(s,a)dads
 \\&-
 \frac{\gamma\norm[\infty]{Q^{\pi_{\vtheta}}}}{2(1-\gamma)^2}\Bigg( \alpha \sup_{s\in\sspace}\int_{\aspace} |\nabla_{\vtheta}\transpose{\pol}\gradj | \de a
-\\&\qquad\qquad + \alpha^2 \sup_{s\in\sspace}\int_{\aspace} \left| \sup_{c \in (0,1)} {\secorder} \right| da \Bigg)^2
+\\&\qquad\qquad + \alpha^2 \sup_{s\in\sspace}\int_{\aspace} \left| \sup_{c \in (0,1)} {\secorder} \right| da \Bigg)^2,
 \end{align*}
 where $\Delta\vtheta=\alpha\gradj$
 \end{theorem}
@@ -211,9 +211,9 @@ With these assumptions, the above bound in~\Cref{th:pirotta-bound3} becomes a mo
 \label{th:adaptive-gauss-bound}
 For any starting state distribution $\mu$, and any pair of stationary Gaussian policies $\pi_{\vtheta}\sim\mathcal{N}(\transpose{\vtheta}\phi(s), \sigma^2)$ and $\pi_{\vtheta '}\sim\mathcal{N}(\transpose{\vtheta'}\phi(s), \sigma^2)$, so that $\vtheta' = \vtheta + \alpha\gradj$, under assumption~\ref{eq:gauss-assumption}, the difference between the performance of $\pi_{\vtheta'}$ and the one of $\pi_{\vtheta}$ can be lower bounded as follows:
 \begin{align*}
-J_\mu(\vtheta') - J_\mu(\vtheta) &\geq \alpha\norm[2]{\gradj}^2- \alpha^2\frac{RM_\phi^2\norm[1]{\gradj}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\aspace|}{\sqrt{2\pi}\sigma}+\frac{\gamma}{2(1-\gamma)}\right)
+J_\mu(\vtheta') - J_\mu(\vtheta) &\geq \alpha\norm[2]{\gradj}^2- \alpha^2\frac{RM_\phi^2\norm[1]{\gradj}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\aspace|}{\sqrt{2\pi}\sigma}+\frac{\gamma}{2(1-\gamma)}\right),
 \end{align*}
-Where $R$ is the maximum absolute reward and $|\aspace|$ is the volume of the action space. 
+where $R$ is the maximum absolute reward and $|\aspace|$ is the volume of the action space. 
 \end{theorem}
 
 This simplified bound has a single maximum attained for some positive value of $\alpha$. The following statement can be used to design a policy gradient algorithm with adaptive step size:
@@ -227,7 +227,7 @@ The performance lower bound provided in \Cref{th:adaptive-gauss-bound} is maximi
 \normalsize
 that guarantees the following policy performance improvement
 \[
-J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{2}\alpha^* \norm[2]{\gradj}^2
+J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{2}\alpha^* \norm[2]{\gradj}^2.
 \]
 \end{corollary}
 
@@ -239,7 +239,7 @@ J_\mu(\vtheta') - J_\mu(\vtheta) \geq \frac{1}{2}\alpha^* \norm[2]{\gradj}^2
 The simplified bound in \Cref{th:adaptive-gauss-bound} depends on some constants and on the policy gradient $\gradj$. In a model-free control problem, we cannot compute the policy gradient directly, hence it has to be estimated from experience samples. This approximation of the policy gradient introduces some noise that can potentially harm the safety of the algorithm.\\
 To address this issue, Papini et al. considered the policy gradient to be a random variable $\estgradj$ that has a bounded error $\epsilon$ with respect to the true value $\gradj$ so that, with probability at least $1-\delta$ we have:
 \[
-\mathbb{P}\left(\left|\gradj - \estgradj\right|\geq\epsilon\right)\leq\delta
+\mathbb{P}\left(\left|\gradj - \estgradj\right|\geq\epsilon\right)\leq\delta.
 \]
 Given this formalization of the policy gradient estimate, we can guarantee a performance improvement bound in high probability:
 \begin{theorem}[Theorem 5.2 from \cite{adaptive_step}]
@@ -298,7 +298,7 @@ The derivation of the bound starts from the following insight, proven in~\cite{n
 \begin{lemma}
 For any pair of policies $\pi$ and $\tilde{\pi}$, the performance of $\tilde{\pi}$ can be written as a function of the advantage $A_\pi$:
 \begin{align*}
-J_\mu(\tilde{\pi}) &= J_\mu(\pi) + \EV[s_0, a_0, \ldots,\sim\tilde{\pi}]{\sum_{t=0}^{\infty}\gamma^t A_\pi(s_t,a_t)} \\&= J_\mu(\pi) + \frac{1}{1-\gamma}\sum_s d_{\mu}^{\tilde{\pi}}(s)\sum_a \tilde{\pi}(a|s)A_\pi(s,a)
+J_\mu(\tilde{\pi}) &= J_\mu(\pi) + \EV[s_0, a_0, \ldots,\sim\tilde{\pi}]{\sum_{t=0}^{\infty}\gamma^t A_\pi(s_t,a_t)} =\\&= J_\mu(\pi) + \frac{1}{1-\gamma}\sum_s d_{\mu}^{\tilde{\pi}}(s)\sum_a \tilde{\pi}(a|s)A_\pi(s,a).
 \end{align*}
 \end{lemma}
 
@@ -309,7 +309,7 @@ d_\mu^{\tilde{\pi}}\sim d_\mu^{\pi}
 \end{equation}
 Next, they defined the quantity $L_\pi$, a local approximation of the policy performance $J(\pi)$:
 \[
-L_\pi(\tilde{\pi}) = J(\pi) + \frac{1}{1-\gamma}\sum_s d_\mu^{\pi}(s) \sum_a \tilde{\pi}(a|s) A_\pi(s,a)
+L_\pi(\tilde{\pi}) = J(\pi) + \frac{1}{1-\gamma}\sum_s d_\mu^{\pi}(s) \sum_a \tilde{\pi}(a|s) A_\pi(s,a).
 \]
 \begin{note}
 When the policy $\pi$ is a parameterized by $\theta$ and is differentiable, with the approximation from~\Cref{eq:trpo-first-approx}, we still have that $L_{\pi_{\theta_0}}$ is a first-order approximation of the performance $J(\pi_{\theta_0})$ evaluated in $\theta_0$
@@ -343,7 +343,7 @@ where $C = \frac{4\epsilon\gamma}{(1-\gamma)^2}$ and $\epsilon = \max_{s,a}|A_\p
 Note that this result is similar (and slightly weaker) to the result from Kakade shown in \Cref{th:kakade1}. There are again two terms, the first related to the advantage of policy $\tilde{\pi}$ with respect to $\pi$ and the second term is a penalization given by the Kullback-Lieber divergence between the two policies.\\
 A policy iteration algorithm can be obtained by observing that:
 \[
-J(\pi_{i+1}) - J(\pi) \geq M_i(\pi_{i+1}) - M_i(\pi_i)
+J(\pi_{i+1}) - J(\pi) \geq M_i(\pi_{i+1}) - M_i(\pi_i),
 \]
 where $M_i(\pi) = L_{\pi_i} - CD_{KL}^{\max}(\pi_i, \pi)$.
 

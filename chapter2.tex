@@ -13,7 +13,7 @@ In this chapter, we will formalize the problem of reinforcement learning using a
 
 \section{Markov Decision Processes}
 \label{sec:mdp}
-In this section we will give a formal definition of reinforcement learning by defining a mathematical model called Markov decision process. For a complete treatment of reinforcement learning, refer to \cite{sutton1998reinforcement}\\
+In this section we will give a formal definition of reinforcement learning by defining a mathematical model called Markov decision process. For a complete treatment of reinforcement learning, refer to \cite{sutton1998reinforcement}.\\
 The main aspects that we want to capture are the interactions between an agent and the environment over time. A learning agent must be able to sense the state of its environment and take some actions, while the environment itself receives the actions from the agent and reacts by changing the state and giving feedbacks to the agent,completing a cycle.
 The agent must also have a goal that is related to a state of the environment.\\
 Markov decision processes are intended to include just these three aspects -- sensation, action and goal -- in their simplest possible forms without trivializing any of them.
@@ -61,7 +61,7 @@ The game of chess can be modelled as an MDP with a discrete state space that enc
 \opencutright
 
 \begin{adjustbox}{valign=C,vspace=0bp,minipage={1.0\linewidth}}
-\begin{example}[Mountain Car]
+\begin{example}[Mountain Car]\label{example:mc}
 \begin{cutout}{0}{7.5cm}{0pt}{12}
 A car is placed between two hills and can move left or right. The goal is to reach the top of the right hill, but the engine is not powerful enough to directly climb the hill, so the optimal solution is to gain momentum by first going in the opposite direction. This task can be modelled with a continuous state space $\sspace \in [-2, 2]$, a continuous action representing the force applied to the car, $\aspace \in [-1, 1]$, a deterministic transition function given by the laws of physics and the following reward function:
 \end{cutout}

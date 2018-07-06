@@ -59,7 +59,7 @@ We define an update in \ref{eq:simple-update} to be a \textit{bounded worsening}
 \end{definition}
 
 
-The value of the baseline policy $\jbase[t]$ and, in particular, the value of $C_t$, can be used to ensure different properties. Two interesting settings that can be identified are:
+The value of the baseline policy $\jbase[t]$ and, in particular, the value of $C^t$, can be used to ensure different properties. Two interesting settings that can be identified are:
 
 \textbf{Monotonic Improvement (MI):} Setting $C^t= 0$ forces a monotonic improvement behaviour, which models the case in which the agent is constrained to continually improve its performance. This is appropriate when policy updates can be done rarely, take a lot of time or have costs/risks that are not modelled in the reward. This is the constraint considered in the safe policy gradient literature presented in \Cref{ch:safepg}.
 
@@ -78,27 +78,27 @@ We can formalize it as:
 \end{align}
 where $\vtheta^{k(t)}$ denotes one of $K$ policies that are evaluated within iteration $t$. This is weaker than type-I, since we have no guarantee on the performance of the single policies that are evaluated -- some of them may perform arbitrarily bad, as long as others are able to compensate. The $K$ policies may represent, \eg intermediate updates to subsets of parameters (as in Section \ref{sec:theory}) or multiple updates within a learning iteration. 
 
-Even more interestingly, we can use constraint (\ref{con:6}) to model the following scenario: assume we want to optimize a target policy $\pi_{\vtarget[]}$ while running a (possibly different) learning policy $\pi_{\vtheta}$. For instance, we may want to find an optimal deterministic controller, while employing a stochastic policy to explore original solutions (as in Deterministic PG algorithms \cite{silver2014deterministic}). \\
-In this case, we can restate \Cref{con:6} in this way:
+Even more interestingly, we can use constraint (\ref{con:6}) to model the following scenario: assume we want to optimize a target policy $\pi_{\vtarget[]}$ while running a (possibly different) learning policy $\pi_{\vtheta_E}$. For instance, we may want to find an optimal deterministic controller, while employing a stochastic policy to explore original solutions (as in Deterministic PG algorithms \cite{silver2014deterministic}). \\
+We will always refer to the exploratory policy parameters with $\vtheta_E$ and to the target policy parameters with $\vtarget[]$. In this case, we can restate \Cref{con:6} in this way:
 \begin{align}\label{con:6target}
-(J(\vtheta^t) + J(\vtarget))/2 \geq \jbase
+(J(\vtheta_E^t) + J(\vtarget))/2 \geq \jbase
 \end{align}
 
 \begin{note}
-The bound in \Cref{con:6} can be obtained by setting $\vtarget[] \equiv \vtheta$. In this case, we are optimizing the performance of the learning policy $\pi_{\vtheta}$ and we are not evaluating any target policy.\\
+The bound in \Cref{con:6} can be obtained by setting $\vtarget[] \equiv \vtheta_E$. In this case, we are optimizing the performance of the learning policy $\pi_{\vtheta_E}$ and we are not evaluating any target policy.\\
 Also, note that evaluating the target policy is not mandatory, but may provide useful information on the quality of the current solution.
 \end{note}
 
 Again, this is equivalent to constraining each parameter update to have the following form:
 \begin{equation}\label{con:type2}
-J(\vtheta^{t+1}) - J(\vtheta^{t}) + J(\vtarget[t+1]) - J(\vtarget) \geq C^t,
+J(\vtheta_E^{t+1}) - J(\vtheta_E^{t}) + J(\vtarget[t+1]) - J(\vtarget) \geq C^t,
 \end{equation}
 for some $C^t\in \realspace$.
 %
 In the spirit of type-II safety, we define a quantity $B$, called \textit{budget}, defined as follows:
 \begin{definition}[Budget] We denote the budget to be the cumulative sum of all the policy performance changes over a learning iteration
 \begin{equation}\label{eq:budget}
-B^t =  \sum_{k=0}^{t} J(\vtheta^t) - J(\vtheta^{t-1}) + J(\vtarget) - J(\vtarget[t-1]).
+B^t =  \sum_{k=0}^{t} J(\vtheta_E^t) - J(\vtheta_E^{t-1}) + J(\vtarget) - J(\vtarget[t-1]).
 \end{equation}
 \end{definition}
 This quantity has an intuitive economical meaning: it includes all the earnings that we got so far through our policy optimization process.\\ 
@@ -111,35 +111,36 @@ In general we want the budget to be non-negative. However approximation errors c
 
 Type-II safety can be restated as a budget constraint as follows:
 \begin{restatable}{theorem}{nonnegativebudget}\label{th:nonnegativebudget}
-Any iterative learning algorithm that maintains $B^t \geq 0$ fulfills type-II safety with respect to a constant baseline $\jbase[] = [J(\vtheta^0) + J(\vtarget[0])] / 2$.
+Any iterative learning algorithm that maintains $B^t \geq 0$ fulfills type-II safety with respect to a constant baseline $\jbase[] = [J(\vtheta_E^0) + J(\vtarget[0])] / 2$.
 \end{restatable}
 %
 We identify three special cases of type-II safety corresponding to different choices of target policy:
 
-\textbf{Lower-Bounded II (LB-II)}: When $\vtarget[]=\vtheta$, we aim to maximize the online performance without doing worse than the initial policy, in terms of average iteration performance. This is a common online-learning scenario.
+\textbf{Lower-Bounded II (LB-II)}: When $\vtarget[] \equiv \vtheta_E$, we aim to maximize the online performance without doing worse than the initial policy, in terms of average iteration performance. This is a common online-learning scenario.
 
-\textbf{Low-Variance (LV)}:  Here $\vtarget[]$ is stochastic, but less exploratory than $\vtheta$. An example scenario is the case in which learning is performed on a prototype before testing on the real system, which may be more critical. 
+\textbf{Low-Variance (LV)}:  Here $\vtarget[]$ is stochastic, but less exploratory than $\vtheta_E$. An example scenario is the case in which learning is performed on a prototype before testing on the real system, which may be more critical. 
 
 \textbf{Zero-Variance (ZV)}: Here $\vtarget[]$ is deterministic. This controller gives more realistic results, but, as we will see in the next section, it is more challenging to give guarantees on deterministic policies.  
 
 \begin{samepage}
-\begin{table}
+\begin{table}[t]
+\centering
 	\caption{Overview of the safety requirements outlined in Section \ref{sec:framework}.}\label{tab:algorithms}
-	\resizebox{\linewidth}{!}{
-	\begin{tabular}[t]{  l | c c c c  }
+	%\resizebox{\linewidth}{!}{
+	\begin{tabularx}{\linewidth}{@{}l | *3{>{\centering\arraybackslash}X}@{} @{}c}
 		Name &  Target policy $\vtarget$ & Baseline $\jbase$ & $C^t$ & Type \\
 		\toprule
-		Monotonic Improvement (MI) &  $\vtheta^t$ & $J(\vtheta^{t})$ & $ 0$ & I\\
+		MI &  $\vtheta_E^t$ & $J(\vtheta_E^{t})$ & $ 0$ & I\\
 		
-		Lower-Bounded I (LB-I) &  $ \vtheta^t$ &$J(\vtheta^0)$ & $J(\vtheta^0) - J(\vtheta^t)$ &  I  \\
+		LB-I &  $ \vtheta_E^t$ &$J(\vtheta_E^0)$ & $J(\vtheta_E^0) - J(\vtheta_E^t)$ &  I  \\
 		
-		Lower-Bounded II (LB-II) &  $ \vtheta^{t}$ &$J(\vtheta^0)$ & $-B^t$ &  II \\
+		LB-II &  $ \vtheta_E^{t}$ &$J(\vtheta_E^0)$ & $-B^t$ &  II \\
 		
-		Low-Variance (LV)  &  $\tilde{\sigma}^t<\sigma^t$ &$[J(\vtheta^0) + J(\vtarget[0])]/2$ & $-B^t $ &  II  \\
+		LV  &  $\tilde{\sigma}^t<\sigma^t$ &$[J(\vtheta_E^0) + J(\vtarget[0])]/2$ & $-B^t $ &  II  \\
 		
-		Zero-Variance (ZV) &  $\tilde{\sigma}^t = 0$ &$[J(\vtheta^0) + J(\vtarget[0])]/2$ & $-B^t$ & II
-	\end{tabular}
-}
+		ZV &  $\tilde{\sigma}^t = 0$ &$[J(\vtheta_E^0) + J(\vtarget[0])]/2$ & $-B^t$ & II
+	\end{tabularx}
+%}
 \end{table}
 
 The safety requirements that we have identified are summarized in Table \ref{tab:algorithms}. In 
@@ -151,7 +152,7 @@ In this section we will develop new theoretical results that will be the main bu
 
 \subsection{Preliminaries}
 
-In this theoretical analysis we will focus on the guaranteed improvement case where $\vtarget=\vtheta^t$, so that the safety constraint can be expressed as:
+In this theoretical analysis we will focus on the guaranteed improvement case where $\vtarget=\vtheta_E^t = \vtheta^t$, so that the safety constraint can be expressed as:
 %
 \begin{align*}
 J(\vtheta^{t+1}) - J(\vtheta^t) \geq C^t, \quad C^t \in \mathbb{R}, C^t < C_{\text{max}}.
@@ -374,9 +375,9 @@ The $\vv$-update and the $w$-update blocks (coloured in \Cref{alg:sepg-I}) can b
 \caption{Safely-Exploring Policy Gradient for type-I safety (SEPG-I)}
     \label{alg:sepg-I}
     \begin{algorithmic}[1] 
-	\State \textbf{input:} $\vtheta^0 = [\vv^0, w^0]$, $T$, $N$
+	\State \textbf{input:} $\vtheta^0 = [\vv^0, w^0]$, $N$
 
-        \For {t = 0,1,2 \ldots $T$}
+        \For {t = 0,1,2 \ldots }
         	\State \textbf{initialize} the value of $C^t$ \label{alg:set-ct}
         	\newline
         	\hspace*{-\fboxsep}\colorbox{aliceblue}{\parbox{\linewidth}{
@@ -418,11 +419,11 @@ In particular, we have seen that performing the $\vv$-update before the $w$-upda
 \caption{Safely-Exploring Policy Gradient for type-II safety (SEPG-II)}
     \label{alg:sepg-II}
     \begin{algorithmic}[1] 
-	\State \textbf{input:} $\vtheta^0 = [\vv^0, w^0]$, $T$, $N$, $B^0$
+	\State \textbf{input:} $\vtheta^0 = [\vv^0, w^0]$, $N$, $B^0$
         \State \textbf{initialize:} $B \gets B^0$
         
-        \State \textbf{evaluate} $\jbase[] = J(\vv^0, w^0)$
-        \For {t = 1 \ldots $T$}
+        \State \textbf{evaluate} $\jbase[0] = J(\vv^0, w^0)$
+        \For {t = 1,2 \ldots}
         \State\newline
         \hspace*{-\fboxsep}\colorbox{aliceblue}{\parbox{\linewidth}{
             \State \textbf{evaluate} $J(\vv^t,w^t)$, $\nabla_{\vv}{J(\vv^t,w^t)}$ 
@@ -447,11 +448,11 @@ In particular, we have seen that performing the $\vv$-update before the $w$-upda
 \caption{Safely-Exploring Policy Gradient (SEPG)}
     \label{alg:adaptive_exp}
     \begin{algorithmic}[1] 
-	\State \textbf{input:} $\vtheta^0 = [\vv^0, w^0]$, $T$, $N$, $B^0$
+	\State \textbf{input:} $\vtheta_E^0 = [\vv^0, w^0]$, $T$, $N$, $B^0$
         \State \textbf{initialize:} $B \gets B^0$
         
-        \State \textbf{evaluate} $\jbase[] = \left(J(\vv^0, w^0) + J(\vtarget[0])\right) / 2$
-        \For {t = 1 \ldots $T$}
+        \State \textbf{evaluate} $\jbase[0] = \left(J(\vv^0, w^0) + J(\vtarget[0])\right) / 2$
+        \For {t = 1,2 \ldots }
 			\State\newline
 			\hspace*{-\fboxsep}\colorbox{aliceblue}{\parbox{\linewidth}{
             \State \textbf{evaluate} $J(\vv^t,w^t)$, $\nabla_{\vv}{J(\vv^t,w^t)}$
@@ -460,7 +461,7 @@ In particular, we have seen that performing the $\vv$-update before the $w$-upda
            \State $B \gets B + J(\vv^{t+1}, w^t) - J(\vv^t, w^t)$.\Comment{$\vv$-budget update}}}
 \newline
 			\hspace*{-\fboxsep}\colorbox{teagreen}{\parbox{\linewidth}{
-            \If{$\vtarget \neq \vtheta^t$}
+            \If{$\vtarget \neq \vtheta_E^t$}
 	            \State \textbf{evaluate} target policy $J(\vtarget)$ without losing more than $B$ budget units \label{alg:evaluatetarget}
     		        \State $B \gets B + J(\vtarget) - J(\vtarget[t-1])$ \Comment{target budget update}
         		 \EndIf   }}
@@ -474,7 +475,7 @@ In particular, we have seen that performing the $\vv$-update before the $w$-upda
     \end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:adaptive_exp} shows the general pseudocode of Safely-Exploring Policy Gradient that, in addition to \Cref{alg:sepg-II}, also considers type-II safety with a target policy. In this last version, we employ all the techniques used in \Cref{alg:sepg-II} and we introduce an additional block (showed in green) that will be evaluated when the target policy is different than the exploratory policy $\vtarget \neq \vtheta^t$. This middle block runs the new target policy and updates the budget with its change in performance.
+Algorithm \ref{alg:adaptive_exp} shows the general pseudocode of Safely-Exploring Policy Gradient that, in addition to \Cref{alg:sepg-II}, also considers type-II safety with a target policy. In this last version, we employ all the techniques used in \Cref{alg:sepg-II} and we introduce an additional block (showed in green) that will be evaluated when the target policy is different than the exploratory policy $\vtarget \neq \vtheta_E^t$. This middle block runs the new target policy and updates the budget with its change in performance.
 
 \begin{note}
 Like in \Cref{alg:sepg-II}, the three blocks in \Cref{alg:adaptive_exp} (in different colour) can be put in any order without breaking the safety guarantees. We decided to put these blocks in this order following the same considerations done for \Cref{alg:sepg-II}: in this way, in fact, the last block that performs the $w$-update receives more budget, which is spent to explore the environment.
