@@ -10,7 +10,7 @@
 One of the challenges that arise in reinforcement learning - opposed to other kinds of learning - is the trade-off between exploration and exploitation. To obtain a lot of reward, a reinforcement learning agent can favour actions that it has tried in the past and found to be effective in producing reward. At the same time, though, discovering such actions requires a trial-and-error search. The agent has to exploit what it has already experienced in order to obtain reward, but it also has to explore in order to make better action selections in the future. This dilemma is that neither exploration nor exploitation can be pursued exclusively without failing at the task: a full-exploit algorithm would likely choose sub-optimal actions while a fully exploratory behaviour will likely to take random actions without long-time awareness.\\
 The agent must try a variety of actions and progressively favour those that appear to be the best. This dilemma can be made even harder when we consider stochastic rewards, where the agents must try the same actions multiple times to be sure about their estimated values. The exploration-exploitation dilemma has been studied intensively for many decades, yet remains an open problem. 
 
-In this chapter, we will combine this important aspect of exploration with safe learning. As it is shown in \Cref{ch:safepg}, safe learning algorithms tend to be over-conservative, resulting in slow and inefficient learning. By customizing safety constraints to match the user needs, we can allow for a controlled exploration that likely speed up convergence. The final result of this chapter is a new practical safe learning algorithm named Safely-Exploring Policy Gradient (SEPG). 
+In this chapter, we will combine this important aspect of exploration with safe learning. As it is shown in \Cref{ch:safepg}, safe learning algorithms tend to be over-conservative, resulting in slow and inefficient learning. By customizing safety constraints to match the user needs, we can allow for a controlled exploration that is likely to speed up convergence. The final result of this chapter is a new practical safe learning algorithm named Safely-Exploring Policy Gradient (SEPG). 
 
 \Cref{sec:sepg-intro} will start by describing the problem of exploration in more details and analysing previous approaches for policy gradient. Then, we will describe a new general framework in \Cref{sec:framework} that reconciles all the aspects of safe learning; in this framework, we will also list special cases corresponding to relevant application scenarios. In \Cref{sec:theory} we will generalize existing performance improvement bounds for Gaussian parametric policies in two ways: we will take more general safety constraints into consideration, and we will deal with adaptive policy variance. Furthermore, we will propose a more exploratory policy update. Finally, in \Cref{sec:algos} we will exploit this theoretical analysis to build policy gradient algorithms tailored to the different safe-learning scenarios, providing Safely-Exploring Policy Gradient (SEPG), a very general algorithm that can be customized to one's needs. Comparative results of SEPG on benchmark continuous RL tasks will be analysed in detail in \Cref{ch:experim}.
 
@@ -26,12 +26,12 @@ One possibility to extend this approach is to update $\sigma$ like one of the po
 
 A different approach was taken by~\cite{haarnoja_reinforcement_2017}, \cite{ziebart_maximum_2008}, \cite{haarnoja2018soft}, who employed maximum-entropy reinforcement learning to improve exploration strategy. A new intrinsic reward is given to the agent proportional to the entropy of the action distribution in that state. In this way, the agent is encouraged to explore as a way to increase the entropy of the policy. Despite its good result in practice, there are still some aspects that should be taken into consideration:
 \begin{itemize}
-\item The agent is optimizing a surrogate objective function that is not defined by the problem.
+\item The agent is optimising a surrogate objective function that is not defined by the problem.
 \item This method introduces an additional hyper-parameter (the weight of the entropy intrinsic reward) that has to be tuned for each environment.
 \item It is not clear how to guarantee safe updates with a surrogate objective function.
 \end{itemize}
 
-In the rest of this chapter, we will propose a new method to adapt exploration in safe reinforcement learning by setting $\sigma$ as to maximize a guaranteed lower-bound on future performance improvement.
+In the rest of this chapter, we will propose a new method to adapt exploration in safe reinforcement learning by setting $\sigma$ so as to maximise a guaranteed lower-bound on future performance improvement.
 
 
 \section{Safe Learning Framework}\label{sec:framework}
@@ -64,14 +64,14 @@ The value of the baseline policy $\jbase[t]$ and, in particular, the value of $C
 \textbf{Monotonic Improvement (MI):} Setting $C^t= 0$ forces a monotonic improvement behaviour, which models the case in which the agent is constrained to continually improve its performance. This is appropriate when policy updates can be done rarely, take a lot of time or have costs/risks that are not modelled in the reward. This is the constraint considered in the safe policy gradient literature presented in \Cref{ch:safepg}.
 
 \textbf{Lower-Bounded I (LB-I):}
-Setting $C^t = J(\vtheta^0) - J(\vtheta^t)$ puts a lower bound on the performance that matches the performance of the initial policy $\pi_{\vtheta^0}$. In this case the main goal is to never do worse than the initial policy. This is appropriate when the initial policy have been designed to avoid dangerous behaviour (modelled in the reward), or when improvement over an already good policy must be guaranteed to justify the deployment of a RL algorithm~\cite{pmlr-v37-thomas15}.
+Setting $C^t = J(\vtheta^0) - J(\vtheta^t)$ puts a lower bound on the performance that matches the performance of the initial policy $\pi_{\vtheta^0}$. In this case the main goal is to never do worse than the initial policy. This is appropriate when the initial policy have been designed to avoid dangerous behaviour (modelled in the reward), or when improvement over an already good policy must be guaranteed to justify the deployment of an RL algorithm~\cite{pmlr-v37-thomas15}.
 
 
 
 \subsection{Type-II safety}
 
-Type-II safety has an economic connotation. Here the reward is designed to record costs and revenues and the constraint is to have sufficient earnings (or limited losses) over some significant horizon. Low performance (\eg due to exploration) is acceptable as long as it is repaid soon enough by an improved behavior~\cite{adaptive_batch}\cite{pmlr-v37-thomas15}.\\
-Formally, type-II safety can be defined as to guarantee a minimum \textit{average} performance $\jbase$ over some interesting time horizon, that we identify with a \textit{learning iteration}. This could be, \eg, a day of production in an automated factory, an accounting trimester and so on. We can run different policies within an iteration, as long as the average performance is above a certain baseline $\jbase$.\\
+Type-II safety has an economic connotation. Here the reward is designed to record costs and revenues and the constraint is to have sufficient earnings (or limited losses) over some significant horizon. Low performance (\eg due to exploration) is acceptable as long as it is repaid soon enough by an improved behaviour~\cite{adaptive_batch}\cite{pmlr-v37-thomas15}.\\
+Formally, type-II safety can be defined so as to guarantee a minimum \textit{average} performance $\jbase$ over some interesting time horizon, that we identify with a \textit{learning iteration}. This could be, \eg a day of production in an automated factory, an accounting trimester and so on. We can run different policies within an iteration, as long as the average performance is above a certain baseline $\jbase$.\\
 We can formalize it as: 
 \begin{align}\label{con:6}
 \frac{1}{K}\sum_{k=1}^{K}J(\vtheta^{k(t)}) \geq \jbase,
@@ -116,7 +116,7 @@ Any iterative learning algorithm that maintains $B^t \geq 0$ fulfills type-II sa
 %
 We identify three special cases of type-II safety corresponding to different choices of target policy:
 
-\textbf{Lower-Bounded II (LB-II)}: When $\vtarget[] \equiv \vtheta_E$, we aim to maximize the online performance without doing worse than the initial policy, in terms of average iteration performance. This is a common online-learning scenario.
+\textbf{Lower-Bounded II (LB-II)}: When $\vtarget[] \equiv \vtheta_E$, we aim to maximise the online performance without doing worse than the initial policy, in terms of average iteration performance. This is a common online-learning scenario.
 
 \textbf{Low-Variance (LV)}:  Here $\vtarget[]$ is stochastic, but less exploratory than $\vtheta_E$. An example scenario is the case in which learning is performed on a prototype before testing on the real system, which may be more critical. 
 
@@ -143,8 +143,8 @@ We identify three special cases of type-II safety corresponding to different cho
 %}
 \end{table}
 
-The safety requirements that we have identified are summarized in Table \ref{tab:algorithms}. In 
-Section \ref{sec:algos} we will propose a general algorithm that can be customized to match any of these constraints.
+The safety requirements that we have identified are summarised in Table \ref{tab:algorithms}. In 
+Section \ref{sec:algos} we will propose a general algorithm that can be customised to match any of these constraints.
 \end{samepage}
 
 \section{Theoretical Analysis}\label{sec:theory}
@@ -157,31 +157,31 @@ In this theoretical analysis we will focus on the guaranteed improvement case wh
 \begin{align*}
 J(\vtheta^{t+1}) - J(\vtheta^t) \geq C^t, \quad C^t \in \mathbb{R}, C^t < C_{\text{max}}.
 \end{align*}
-Here $C_\text{max}$ represents the maximum guaranteed improvement allowed by the theoretical bound on performance improvement. Since all the bounds that we are going to use are second-order polynomials, the maximum can be easily found in closed-form. From this specific case, we will see how to generalize to all the other cases presented in \Cref{sec:framework}.
+Here $C_\text{max}$ represents the maximum guaranteed improvement allowed by the theoretical bound on performance improvement. Since all the bounds that we are going to use are second-order polynomials, the maximum can be easily found in closed-form. From this specific case, we will see how to generalise to all the other cases presented in \Cref{sec:framework}.
 
 Moreover, we will focus on Gaussian policies of the form:
 \[
 	\pi_{\vtheta}(a\vert s) = \frac{1}{\sqrt{2\pi}\sigma_{\vtheta}}\exp\left\{-\frac{1}{2}\left(\frac{a - \mu_{\vtheta}(s)}{\sigma_{\vtheta}}\right)^2\right\},
 \]
-using the following, common parametrization:
+using the following, common parametrisation:
 \begin{align}\label{eq:parametrization}
 \mu(s)=\vv^T\vphi(s), \qquad \sigma=e^w, \qquad \vtheta=[\vv\vert w],
 \end{align}
 where $\vphi$ are bounded state-features, \ie $\phi_i(s) \leq M_{\vphi}$ for each $s\in\Sspace, i=1,\dots,m$.
-This parametrization is such that the we have always a positive exploration coefficient $\sigma=e^w$ and the deterministic policy is approached when $w \rightarrow -\infty$. For this reason, we will define the deterministic policy with $\pi_{\vtheta}$ where $\vtheta = \transpose{[\vv \mid -\infty]}$.
+This parametrization is such that we have always a positive exploration coefficient $\sigma=e^w$ and the deterministic policy is approached when $w \rightarrow -\infty$. For this reason, we will define the deterministic policy with $\pi_{\vtheta}$ where $\vtheta = \transpose{[\vv \mid -\infty]}$.
 
 
 More complex representations are possible, \eg $\mu$ can be parametrized by a neural network. In some cases, also the standard deviation can be state-dependent. However, in this work we will only consider the linear-mean parametrization. \\
 Another common generalization is to extend the policy to multi-dimensional action spaces by employing an independent Gaussian policy for each action dimension. This extension will be discussed in \Cref{app:multi}.
 
-Given this new notation, we can restate and summarize the theorems described in \Cref{sec:ass} and \Cref{sec:abs}, that will be the starting point for the adaptive variance case described in the next section:
+Given this new notation, we can restate and summarise the theorems described in \Cref{sec:ass} and \Cref{sec:abs}, that will be the starting point for the adaptive variance case described in the next section:
 \begin{restatable}[From Theorem 3.3 in~\cite{adaptive_batch}]{theorem}{safetheta}\label{th:safetheta}
 	Assuming $w^t = \text{const} $ for all $t$, update rule (\ref{up:onlyv}) guarantees:
 	\begin{align}\label{stat:1_1}
 	J(\vv^{t+1}, w^t) - J(\vv^t, w^t) \geq \alpha\norm[\infty]{\gradJ[\vv]{\vv^t,w^t}}^2 - 
 	\alpha^2 c \norm[\infty]{\gradJ[\vv]{\vv^t,w^t}}^2,
 	\end{align}
-	where $c = \frac{RM_{\phi}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\mathcal{A}|}{\sqrt{2\pi}\sigma} +	\frac{\gamma}{2(1-\gamma)}\right)$ and  $|\mathcal{A}|$ is the volume of the action space. Guaranteed improvement is maximized by using a step size $\alpha^* = \frac{1}{2c}$, yielding:
+	where $c = \frac{RM_{\phi}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\mathcal{A}|}{\sqrt{2\pi}\sigma} +	\frac{\gamma}{2(1-\gamma)}\right)$ and  $|\mathcal{A}|$ is the volume of the action space. Guaranteed improvement is maximised by using a step size $\alpha^* = \frac{1}{2c}$, yielding:
 	\begin{align}\label{stat:1_2}
 	J(\vv^{t+1},w^t) - J(\vv^t,w^t) \geq \frac{\norm[\infty]{\gradJ{\vv^t,w^t}}^2}{4c}
 	\coloneqq C_{\text{max}}^{\vv}.
@@ -205,7 +205,7 @@ proving that it yields better guarantees than any gradient ascent update.\\
 Only the parameter with maximum absolute-value partial derivative is updated, and ties can be broken in any way\footnote{It is important to choose a single parameter in case of ties, otherwise convergence is not guaranteed}. Greedy coordinate ascent does not inherit the convergence properties of coordinate ascent, but has been proven to converge anyway~\cite{nutinicoordinate}. \Cref{th:safetheta} shows the performance improvement properties of this algorithm.
 
 
-We generalize this result to the adaptive-variance case. Since the above guarantees require a fixed $w$, we can split the update rule in two parts: we first update the mean parameter ($\vv$-update) keeping $w$ fixed, then we update the variance parameter ($w$-update) keeping the mean parameters $\vv$ fixed:
+We generalise this result to the adaptive-variance case. Since the above guarantees require a fixed $w$, we can split the update rule in two parts: we first update the mean parameter ($\vv$-update) keeping $w$ fixed, then we update the variance parameter ($w$-update) keeping the mean parameters $\vv$ fixed:
 %
 \begin{align}\label{eq:naive_update}
 \begin{cases}
@@ -231,7 +231,7 @@ Addressing the problem of establishing similar performance improvement propertie
 	\begin{align}\label{stat:2_1}
 	J(\vv^{t+1}, w^{t+1}) - J(\vv^{t+1}, w^t) \geq \beta\gradJ[w]{\vv^{t+1}, w^t}^2 - \beta^2 d\gradJ[w]{\vv^{t+1}, w^t}^2,
 	\end{align}
-	where $d=\frac{R}{(1-\gamma)^2}\left(\frac{\psi|\Aspace|}{2\sigma_{w}}+\frac{\gamma}{1-\gamma}\right)$ and $\psi = \nicefrac{4(\sqrt{7} - 2)\exp(\nicefrac{\sqrt{7}}{2} - 2)}{\sqrt{2\pi}} \simeq 0.524$. Guaranteed improvement is maximized by using a step size $\beta^*=\frac{1}{2d}$, yielding:
+	where $d=\frac{R}{(1-\gamma)^2}\left(\frac{\psi|\Aspace|}{2\sigma_{w}}+\frac{\gamma}{1-\gamma}\right)$ and $\psi = \nicefrac{4(\sqrt{7} - 2)\exp(\nicefrac{\sqrt{7}}{2} - 2)}{\sqrt{2\pi}} \simeq 0.524$. Guaranteed improvement is maximised by using a step size $\beta^*=\frac{1}{2d}$, yielding:
 	\begin{align}\label{stat:2_2}
 	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1}, w^t) \geq \frac{\gradJ[w]{\vv^{t+1}, w^t}^2}{4d}
 	\coloneqq C_{\text{max}}^w. 
@@ -248,7 +248,7 @@ However, as stated in \Cref{sec:sepg-intro}, a greedy update of $w$ may not be a
 
 \subsection{Safely Exploring PG}\label{sec:explore+safe}
 The $w$-update in (\ref{eq:naive_update}) does not take into consideration, in any way, the potential benefits of increasing exploration. In practice, following $\nabla_{w}J$ often results in greedy learning, setting the policy variance to small values very soon in order to exploit the current solution, which is usually suboptimal. More far-sighted algorithms would keep the variance high, or even increase it, long enough to properly explore the space of policies. \\
-We now provide a variant of (\ref{eq:naive_update}) that is more exploratory while preserving safety guarantees. The first key intuition is that, in many situations, larger values of $\sigma=e^w$ can positively affect the guaranteed improvement yielded by the next $\vv$-update. Hence, we want to update $w$ in order to maximize this improvement. \\
+We now provide a variant of (\ref{eq:naive_update}) that is more exploratory while preserving safety guarantees. The first key intuition is that, in many situations, larger values of $\sigma=e^w$ can positively affect the guaranteed improvement yielded by the next $\vv$-update. Hence, we want to update $w$ in order to maximise this improvement. \\
 We first need a simplified version of Theorem \ref{th:safetheta}:
 \begin{restatable}[]{corollary}{simplev}\label{th:simplev}
 	The $\vv$-update in (\ref{eq:naive_update}) with optimal step size $\alpha^*$ from Theorem \ref{th:safetheta} guarantees:
@@ -268,7 +268,7 @@ w^{t+1} \gets w^t + \beta\gradDelta(\vv^{t+1}, w^t).
 \end{cases}
 \end{align}
 %
-The idea is to update $w$ as to maximize the performance improvement that the subsequent $\vv$-update is able to guarantee. This is a more far-sighted version of (\ref{up:exp}), using the bound in Corollary \ref{th:simplev} to look one step ahead. Since high values of $w$ lead to better performance improvement bounds, this typically favours exploration over exploitation.\\
+The idea is to update $w$ so as to maximise the performance improvement that the subsequent $\vv$-update is able to guarantee. This is a more far-sighted version of (\ref{up:exp}), using the bound in Corollary \ref{th:simplev} to look one step ahead. Since high values of $w$ lead to better performance improvement bounds, this typically favours exploration over exploitation.\\
 It remains to establish the safety of this new update. 
 The next key insight is that Theorem \ref{th:safesigma} provides a measure of guaranteed improvement for any step size $\beta$, even negative ones. So, even if the $w$-update is in the direction of $\gradDelta$, we can measure guaranteed improvement by the corresponding step in the direction of $\nabla_{w}J$ with a simple rescaling:
 \begin{restatable}[]{theorem}{allsafe}\label{th:safe_exp}
@@ -277,7 +277,7 @@ The next key insight is that Theorem \ref{th:safesigma} provides a measure of gu
 	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1},w^t) \geq \beta\gradDelta(\vv^{t+1},w^t)\gradJ[w]{\vv^{t+1},w^t}-
 	\beta^2 d \gradDelta(\vv^{t+1},w^t)^2.
 	\end{align*}
-	Guaranteed improvement is maximized by using a step size $\tilde{\beta} =\frac{\gradJ[w]{\vv^{t+1},w^t}}{2d\gradDelta(\vv^{t+1},w^t)}$, yielding:
+	Guaranteed improvement is maximised by using a step size $\tilde{\beta} =\frac{\gradJ[w]{\vv^{t+1},w^t}}{2d\gradDelta(\vv^{t+1},w^t)}$, yielding:
 	\begin{align*}
 	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1}, w^t) \geq C_{\text{max}}^w. 
 	\end{align*}
@@ -309,11 +309,11 @@ which combines greediness and exploration while satisfying Safety Constraint~(\r
 
 \Cref{fig:boobs} recaps the idea of this novel update. By considering an update rule for the $w$-update of this form: $w^{t+1} \gets w^t + \overline{\beta} \nabla_w J_\mu(\vv^{t+1}, w^t)$ we can have two cases:
 \begin{itemize}
-\item $\nabla_w J(\cdot) \cdot \nabla_w \Deltav(\cdot) > 0$: The update direction of the surrogate objective is the same as the na\`ive one. In this case the step size $\overline{\beta}$ will be positive and will follow both the surrogate and the na\`ive gradient.
-\item $\nabla_w J(\cdot) \cdot \nabla_w \Deltav(\cdot) < 0$: In this case we are likely to move in the opposite way w.r.t. the na\`ive gradient $\nabla_w J_\mu(\cdot)$. More specifically, we can identify two sub-cases:
+\item $\nabla_w J(\cdot) \cdot \nabla_w \Deltav(\cdot) > 0$: The update direction of the surrogate objective is the same as the na\"ive one. In this case the step size $\overline{\beta}$ will be positive and will follow both the surrogate and the na\"ive gradient.
+\item $\nabla_w J(\cdot) \cdot \nabla_w \Deltav(\cdot) < 0$: In this case we are likely to move in the opposite way w.r.t. the na\"ive gradient $\nabla_w J_\mu(\cdot)$. More specifically, we can identify two sub-cases:
 \begin{itemize}
-\item If we must guarantee a required improvement, then the step size $\overline{\beta}$ will be negative and we move against the surrogate objective and towards the na\`ive gradient direction.
-\item Otherwise, if we can afford a bounded worsening, the step size $\overline{\beta}$ will be positive and we move according to the surrogate objective and against the na\`ive gradient. This is the most interesting case where the $w$-update is in the opposite direction w.r.t. conventional updates.
+\item If we must guarantee a required improvement, then the step size $\overline{\beta}$ will be negative and we move against the surrogate objective and towards the na\"ive gradient direction.
+\item Otherwise, if we can afford a bounded worsening, the step size $\overline{\beta}$ will be positive and we move according to the surrogate objective and against the na\"ive gradient. This is the most interesting case where the $w$-update is in the opposite direction w.r.t. conventional updates.
 \end{itemize}
 \end{itemize}
 
@@ -325,11 +325,11 @@ As mentioned in Section \ref{sec:mdp}, a common policy class for the case $\Aspa
 \[
 \pi_{\vtheta}(a\vert s) = \frac{1}{\sqrt{2\pi}\vsigma_{\vtheta}}\exp\left\{-\frac{1}{2}\left(\frac{a - \mu_{\vtheta}(s)}{\vsigma_{\vtheta}}\right)^2\right\},
 \]
-where all vector operations are component-wise. The result is, of course, a multi-dimensional action. The natural generalization of Parametrization (\ref{eq:parametrization}) is:
+where all vector operations are component-wise. The result is, of course, a multi-dimensional action. The natural generalisation of Parametrisation (\ref{eq:parametrization}) is:
 \begin{align}\label{eq:parametrization_multi}
 \mu_{\vtheta}(s)=\vv^T\vphi(s), \qquad \vsigma_{\vtheta}=e^{\vw}, \qquad \vtheta=[\vv\vert \vw],
 \end{align}
-where $\vw$ is an $l$-dimensional vector. Following what \cite{adaptive_batch} do for the mean parameter, we update $\vw$ by greedy coordinate descent as well. All the results on $\vv$ naturally extends to $\vw$ since the bounds in Theorems \ref{th:safesigma} and \ref{th:safe_exp} differ from the one in \ref{th:safetheta} only by a constant. We just provide the multi-dimensional version of Update \ref{up:morexp}:
+where $\vw$ is an $l$-dimensional vector. Following what \cite{adaptive_batch} do for the mean parameter, we update $\vw$ by greedy coordinate descent as well. All the results on $\vv$ naturally extend to $\vw$ since the bounds in Theorems \ref{th:safesigma} and \ref{th:safe_exp} differ from the one in \ref{th:safetheta} only by a constant. We just provide the multi-dimensional version of Update \ref{up:morexp}:
 \begin{align*}
 \begin{cases}
 v_{k}^{t+1} \gets \overline{\alpha}\gradJ[v_{k}]{\vv^t,w^t}
@@ -339,7 +339,7 @@ w_h^{t+1} \gets \overline{\beta}\nabla_{w_h}\mathcal{L}(\vv^{t+1}, w^t)
 \end{cases}
 \end{align*}
 An even further generalization would be to consider a non-diagonal covariance matrix. This is interesting, but out of the scope of this work: here we study the effects of the variance on exploration, while a full covariance matrix also models correlations among action dimensions that may be useful to learn in some tasks.
-Another promising generalization, left to future work, is represented by a state-dependent policy variance, which would allow a more powerful kind of exploration.
+Another promising generalisation, left to future work, is represented by a state-dependent policy variance, which would allow a more powerful kind of exploration.
 
 
 
@@ -481,7 +481,7 @@ Algorithm \ref{alg:adaptive_exp} shows the general pseudocode of Safely-Explorin
 Like in \Cref{alg:sepg-II}, the three blocks in \Cref{alg:adaptive_exp} (in different colour) can be put in any order without breaking the safety guarantees. We decided to put these blocks in this order following the same considerations done for \Cref{alg:sepg-II}: in this way, in fact, the last block that performs the $w$-update receives more budget, which is spent to explore the environment.
 \end{note}
 
-The evaluation of the target policy requires additional considerations. As stated in line~\ref{alg:evaluatetarget}, we should be able to evaluate the target policy without losing more than $B$ budget units. The problem is that we don't have any guarantee on the target policy in general, which can perform arbitrarily bad. We faced this problem in two ways: the first solution will provide a stochastic target policy with some theoretical guarantees. The second solution, instead, will provide a more practical algorithm that has no theoretical guarantees, but was found to be safe enough and remarkably faster than the other solutions. The two solutions are presented below:
+The evaluation of the target policy requires additional considerations. As stated in line~\ref{alg:evaluatetarget}, we should be able to evaluate the target policy without losing more than $B$ budget units. The problem is that we have no guarantee on the target policy in general, which can perform arbitrarily bad. We faced this problem in two ways: the first solution will provide a stochastic target policy with some theoretical guarantees. The second solution, instead, will provide a more practical algorithm that has no theoretical guarantees, but was found to be safe enough and remarkably faster than the other solutions. The two solutions are presented below:
 
 \textbf{Low Variance (SEPG-LV):} In this setting, we derive a target policy that aims to have lower variance than the exploratory policy on which we can still have guarantees on its performance. This can be the case in which we want to evaluate our policy on a prototype before starting the production. The low-variance policy $\pi_{\vtheta^t_{\text{LV}}}$ is defined as follows:
 \begin{align*}
@@ -490,7 +490,7 @@ The evaluation of the target policy requires additional considerations. As state
 \end{align*}
 Intuitively, the low-variance policy is the policy that shares the same mean $\vv$ of the exploratory policy and has the lowest possible value of $\underline{w}$ that allows a bounded worsening of at most $B$. The value of $\underline{w}$ can be computed using constraints (\ref{stat:2_3}) from Theorem \ref{th:safesigma}
 
-\textbf{Zero Variance (SEPG-ZV):} In this second scenario, we consider as a target policy the deterministic policy with the same mean $\vv$ of the exploratory policy: $\vtheta^t_{\text{ZV}} = \transpose{[\vv^t \mid -\infty]}$. In this case we don't have any guarantee on the performance of the deterministic policy, but we note that, in case the budget goes negative, the algorithm will automatically  try to compensate by performing required-improvement steps both for the $\vv$ and $w$-update. For this reason SEPG-ZV can formally guarantee type-II safety only on an infinite number of iterations. 
+\textbf{Zero Variance (SEPG-ZV):} In this second scenario, we consider as a target policy the deterministic policy with the same mean $\vv$ of the exploratory policy: $\vtheta^t_{\text{ZV}} = \transpose{[\vv^t \mid -\infty]}$. In this case we have no guarantee on the performance of the deterministic policy, but we note that, in case the budget goes negative, the algorithm will automatically  try to compensate by performing required-improvement steps both for the $\vv$ and $w$-update. For this reason SEPG-ZV can formally guarantee type-II safety only on an infinite number of iterations. 
 
 
 
@@ -500,7 +500,7 @@ Intuitively, the low-variance policy is the policy that shares the same mean $\v
 
 First of all, we assumed that each iteration of the algorithm should collect $N$ sample trajectories in total. In this work we have split these $N$ trajectories evenly among the blocks. Several solutions could be developed by splitting the trajectories in different ways, \eg by giving more weight to the $\vv$-update rather than the $w$-update.
 
-A second observation is that in the pseudocode the $\vv$-budget update requires the value of $J(\vv^{t+1}, w^t)$, that is only estimated at the beginning of the third block. A similar consideration can be done for the $w$-budget update in line 18. This problem can be solved simply by delaying the $\vv$-budget update between lines 15 and 16, right after the estimation of $J(\vv^{t+1}, w^t)$. This won't break the safety guarantee since the value of the budget is not used until line 16 to calculate $\overline{\beta}$. We decided to present the pseudocode in this form because it is easier and can be clearly subdivided into the three blocks.
+A second observation is that in the pseudocode the $\vv$-budget update requires the value of $J(\vv^{t+1}, w^t)$, that is only estimated at the beginning of the third block. A similar consideration can be done for the $w$-budget update in line 18. This problem can be solved simply by delaying the $\vv$-budget update between lines 15 and 16, right after the estimation of $J(\vv^{t+1}, w^t)$. This will not break the safety guarantee since the value of the budget is not used until line 16 to calculate $\overline{\beta}$. We decided to present the pseudocode in this form because it is easier and can be clearly subdivided into the three blocks.
 
 Finally, we tried to develop also a new variant that, like SEPG-ZV, does not have any theoretical guarantees, but converges significantly faster than any other variant. This new version, named SEPG-SIM was built by merging the $\vv$-update and the $w$-update blocks into a single block. In other words, we computed $\overline{\alpha}$ and $\overline{\beta}$ simultaneously using a single batch of trajectories. This was far more sample efficient, since it required only $\nicefrac{2}{3}$ of the samples per iteration, but it raised a new problem: how to spilt the budget between the $\vv$-update and the $w$-update. Since this new problem was quite challenging, we decided to leave this for future works.
 
@@ -508,8 +508,8 @@ Finally, we tried to develop also a new variant that, like SEPG-ZV, does not hav
 \section{Approximate Framework}\label{sec:approx}
 
 %\subsection{Remarks on gradient approximation}\label{sec:approx_short}
-As we have seen in \Cref{ch:rl}, when learning in a model-free scenario, we need to estimate the gradient from samples. The error on these estimations can harm the safety guarantees described in \Cref{sec:framework}. In this section we will provide a solution to mitigate this problem by deriving high-probability variants of the performance improvement bounds of \ref{sec:theory}, as done in \cite{adaptive_step} and \cite{adaptive_batch}. \\
-In the following derivation we will assume unbiased estimator for the policy gradient, \eg, REINFORCE (\ref{eq:reinforce}). The estimation of $\gradDelta$ is more involved, but we provide an unbiased estimator in \Cref{app:estimating}.
+As we have seen in \Cref{ch:rl}, when learning in a model-free scenario, we need to estimate the policy gradient from samples. The error on these estimations can harm the safety guarantees described in \Cref{sec:framework}. In this section, we will provide a solution to mitigate this problem by deriving high-probability variants of the performance improvement bounds of \ref{sec:theory}, as done in \cite{adaptive_step} and \cite{adaptive_batch}. \\
+In the following derivation, we will assume that an unbiased estimator is employed for the policy gradient $\nabla_{\vtheta}J$, \eg REINFORCE (\ref{eq:reinforce}). The estimation of $\gradDelta$ is more involved, but we provide an unbiased estimator in \Cref{app:estimating}.
 %
 %When the true policy gradient cannot be computed, we can use, \eg, the REINFORCE estimator (\ref{eq:reinforce}). The estimation of $\nabla_w\mathcal{L}$ is more involved, but we provide an unbiased estimator in Appendix \ref{app:estimating}. 
 %
@@ -527,13 +527,13 @@ First, we need to bound the gradient estimation error in high probability, and t
 	&\norm[\infty]{\widehat{\nabla}_{\vtheta}F} > \epsilon\quad\text{always}.\label{eq:c_1_2}
 	\end{align}
 \end{restatable}
-The latter statement (\ref{eq:c_1_2}) can be used as a stopping condition in iterative algorithms. In fact, when no (estimated) gradient component is greater than noise $\epsilon$, no reliable coordinate-ascent policy update can be performed. It remains to characterize the gradient estimation error to satisfy (\ref{eq:c_1_2}) in an useful and meaningful way. This can be done by employing known, distribution-independent statistical inequalities such as Chebyshev's, Hoeffding's or variants of Bernstein's inequality, as done in \cite{adaptive_batch}. In this work, we choose to employ t-based confidence intervals to obtain less conservative high-probability bounds:
+The latter statement (\ref{eq:c_1_2}) can be used as a stopping condition in iterative algorithms. In fact, when no (estimated) gradient component is greater than noise $\epsilon$, no reliable coordinate-ascent policy update can be performed. It remains to characterize the gradient estimation error to satisfy (\ref{eq:c_1_2}) in a useful and meaningful way. This can be done by employing known, distribution-independent statistical inequalities such as Chebyshev's, Hoeffding's or variants of Bernstein's inequality, as done in \cite{adaptive_batch}. In this work, we choose to employ t-based confidence intervals to obtain less conservative high-probability bounds:
 \begin{align*}
 	&\epsilon_i \coloneqq t_{\nicefrac{\delta}{2}, N-1}\sqrt{\frac{\widehat{\Var}\left[\widehat{\nabla}_{\theta_i}F\right]}
 		{N}},\\
 	&\epsilon = \max_i\{\epsilon_i\},
 \end{align*}
-where $\widehat{\Var}$ is the sample variance and $t_{\nicefrac{\delta}{2},N-1}$ is the $(1-\nicefrac{\delta}{2})$-quantile of a Student's t-distribution with $N-1$ degrees of freedom. Note that all the estimators that we employ are unbiased (REINFORCE for the policy gradient, the estimator proposed in Appendix \ref{app:estimating} for $\nabla_w\mathcal{L}$). However, the underlying trajectory-generating process being clearly non-Gaussian, we need to invoke the Central Limit Theorem, \ie our t-based confidence interval satisfies Assumption \ref{ass:bounded_err} only in the limit of an infinite batch size. We do not think this is critical since we use $N\sim 100$, and especially because the performance improvement bounds of Section \ref{sec:theory} are made very conservative by problem-dependent constants anyway. In the safe-RL literature, a similar \text{false-Gaussianity} assumption is done in \cite{pmlr-v37-thomas15}, albeit with different motivations. The same authors call \textit{semi-safe} an algorithm that makes a false, but reasonable assumption. This, however can be seen as an implementation choice, since Assumption \ref{ass:bounded_err} could be satisfied in more rigorous ways (see \cite{adaptive_batch} for some examples).
+where $\widehat{\Var}$ is the sample variance and $t_{\nicefrac{\delta}{2},N-1}$ is the $(1-\nicefrac{\delta}{2})$-quantile of a Student's t-distribution with $N-1$ degrees of freedom. Note that all the estimators that we employ are unbiased (REINFORCE for the policy gradient, the estimator proposed in Appendix \ref{app:estimating} for $\nabla_w\mathcal{L}$). However, the underlying trajectory-generating process being clearly non-Gaussian, we need to invoke the Central Limit Theorem, \ie our t-based confidence interval satisfies Assumption \ref{ass:bounded_err} only in the limit of an infinite batch size. We do not think this is critical since, in our experiments, we use $N\sim 100$, and especially because the performance improvement bounds of Section \ref{sec:theory} are made very conservative by problem-dependent constants anyway. In the safe-RL literature, a similar \text{false-Gaussianity} assumption is done in \cite{pmlr-v37-thomas15}, albeit with different motivations. The same authors call \textit{semi-safe} an algorithm that makes a false, but reasonable assumption. Ours, however can be seen as an implementation choice, since Assumption \ref{ass:bounded_err} could be satisfied in more rigorous ways (see \cite{adaptive_batch} for some examples).
 
 Once the estimation error has been characterized,
 we can define the following lower-corrected and upper-corrected gradient norms:
@@ -548,7 +548,7 @@ where $\mathbf{\epsilon}=[\epsilon_1,\dots,\epsilon_m]^T$. To obtain high-probab
 	J(\vv^{t+1}) - J(\vv^t) \geq \alpha\left(\norm[\infty]{\gradJ[\vv]{\vv^t}}^-\right)^2 - 
 	\alpha^2 c \left(\norm[\infty]{\gradJ[\vv]{\vv^t}}^+\right)^2,
 	\end{align}
-	where $c = \frac{RM_{\phi}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\mathcal{A}|}{\sqrt{2\pi}\sigma} +	\frac{\gamma}{2(1-\gamma)}\right)$ and  $|\mathcal{A}|$ is the volume of the action space. Guaranteed improvement is maximized by using a step size $\alpha^* = \frac{1}{2c}$, yielding:
+	where $c = \frac{RM_{\phi}^2}{(1-\gamma)^2\sigma^2}\left(\frac{|\mathcal{A}|}{\sqrt{2\pi}\sigma} +	\frac{\gamma}{2(1-\gamma)}\right)$ and  $|\mathcal{A}|$ is the volume of the action space. Guaranteed improvement is maximised by using a step size $\alpha^* = \frac{1}{2c}$, yielding:
 	\begin{align}
 	J(\vv^{t+1}) - J(\vv^t) \geq \frac{\left(\norm[\infty]{\gradJ{\vv^t}}^-\right)^4}{4c\left(\norm[\infty]{\gradJ{\vv^t}}^+\right)^2}
 	\coloneqq C_{\text{max}}^{\vv},
@@ -564,10 +564,10 @@ The gradients \wrt $w$ are scalar, but we keep the norm notation for the sake of
 %
 \begin{restatable}[]{theorem}{safesigmaapp}\label{th:safesigmaapp}
 	Assuming $o(|\Delta w|^3)$ terms can be neglected, the $w$-update in (\ref{eq:naive_update}), where $\nabla_wJ$ is replaced by an estimator $\widehat{\nabla}_{w}J$ satisfying Assumption \ref{ass:bounded_err}, guarantees, with probability at least $(1-\delta)$:
-	\begin{align}
-	J(\vv^{t+1}, w^{t+1}) - J(\vv^{t+1}, w^t) \geq \beta\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\right)^2 - \beta^2 d\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^+\right)^2,
+	\begin{align}\small
+	J(\vv^{t+1}, w^{t+1}) - J(\vv^{t+1}, w^t) \geq \beta\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\right)^2 - \beta^2 d\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^+\right)^2,\normalfont
 	\end{align}
-	where $d=\frac{R}{(1-\gamma)^2}\left(\frac{\psi|\Aspace|}{2\sigma_{w}}+\frac{\gamma}{1-\gamma}\right)$ and $\psi = \nicefrac{4(\sqrt{7} - 2)\exp(\nicefrac{\sqrt{7}}{2} - 2)}{\sqrt{2\pi}} \simeq 0.524$. Guaranteed improvement is maximized by using a step size $\beta^*=\frac{1}{2d}$, yielding:
+	where $d=\frac{R}{(1-\gamma)^2}\left(\frac{\psi|\Aspace|}{2\sigma_{w}}+\frac{\gamma}{1-\gamma}\right)$ and $\psi = \nicefrac{4(\sqrt{7} - 2)\exp(\nicefrac{\sqrt{7}}{2} - 2)}{\sqrt{2\pi}} \simeq 0.524$. Guaranteed improvement is maximised by using a step size $\beta^*=\frac{1}{2d}$, yielding:
 	\begin{align}
 	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1}, w^t) \geq \frac{\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\right)^4}{4d\left(\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^+\right)^2}
 	\coloneqq C_{\text{max}}^w, 
@@ -589,7 +589,7 @@ The gradients \wrt $w$ are scalar, but we keep the norm notation for the sake of
 	&-
 	\beta^2 d \left(\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^+\right)^2.
 	\end{align*}
-	Guaranteed improvement is maximized by using a step size $\tilde{\beta} =\frac{\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^-}{2d\left(\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^+\right)^2}$, yielding:
+	Guaranteed improvement is maximised by using a step size\\ $\tilde{\beta} =\frac{\norm[\infty]{\widehat{\nabla}_wJ(\vv^{t+1},w^t)}^-\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^-}{2d\left(\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^+\right)^2}$, yielding:
 	\begin{align*}
 	J(\vv^{t+1},w^{t+1}) - J(\vv^{t+1}, w^t) \geq 
 	\left(\frac{\norm[\infty]{\widehat{\nabla}_w\mathcal{L}(\vv^{t+1},w^t)}^
@@ -604,3 +604,4 @@ The gradients \wrt $w$ are scalar, but we keep the norm notation for the sake of
 	where $\lambda_{w}=\sqrt{1 - \nicefrac{\nu C}{C_{\text{max}}^{w}}}$, are enough to guarantee $J(\vv^{t+1},w^t) - J(\vv^{t+1},w^t)\geq \nu C$ with probability at least $(1-\delta)^m$.
 \end{restatable}
 
+These results offer high-probability bounds on the performance improvement, that can be used to further customise the safety constraint needs for different values of $\delta$ and $\epsilon$.

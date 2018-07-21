@@ -75,13 +75,15 @@ h\left({\vtheta}\right) &= \int_T p_{\vtheta}\left(\tau_{0:H}\right)\score[\vthe
  \end{align}
 Next, we will show that (\ref{second}), (\ref{third}) and (\ref{forth}) will both evaluate to $0$:
 \allowdisplaybreaks
+\small
 \begin{align*}
-(\ref{second})
-&=
+&(\ref{second})
+=
 \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma} \right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv} \right)\de\tau 
-=\\ &=
-\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\int_{T}p_{\vtheta}\left(\tau_{t+1:H}\right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv}\right)\de\tau 
-=\\ &=
+=\\ &= 
+\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau
+\int_{T}p_{\vtheta}\left(\tau_{t+1:H}\right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv}\right)\de\tau 
+=\\ &= 
 \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\int_{T}p_{\vtheta}\left(\tau_{t+1:H}\right)\nabla_{\vv}\log p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
 =\\ &=
 \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\int_{T}\nabla_{\vv} p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
@@ -89,12 +91,14 @@ Next, we will show that (\ref{second}), (\ref{third}) and (\ref{forth}) will bot
 \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k'}{0}{t}{\sigma}\right)\de\tau\nabla_{\vv}\int_{T} p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
 =\\ &= 0
 \end{align*}
+\normalsize
 \allowdisplaybreaks[0]
 Using the same approach of (\ref{second}) we can say that (\ref{third}) = 0
 \allowdisplaybreaks
+\small
 \begin{align*}
-(\ref{forth})
-&=
+&(\ref{forth})
+=
 \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:H}\right)\gamma^{t}r_{t}\left(\gradlogsumpi{k''}{t+1}{H}{\sigma} \right)\left(\gradlogsumpi{h''}{t+1}{H}{\vv} \right)\de\tau
 = \\ &=
 \sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}p_{\vtheta}\left(\tau_{t+1:H}\right)\nabla_{\sigma}\log p_{\vtheta}\left(\tau_{t+1:H}\right)\nabla_{\vv}\log p_{\vtheta}\left(\tau_{t+1:H}\right)\de\tau
@@ -110,6 +114,7 @@ Using the same approach of (\ref{second}) we can say that (\ref{third}) = 0
 \frac{2}{\sigma}\sum_{t=0}^{H}\int_{T}p_{\vtheta}\left(\tau_{0:t}\right)\gamma^{t}r_{t}\de\tau\int_{T}\nabla_{\vv} p_{\vtheta}(\tau_{t+1:H}) \de\tau
 = 0.
 \end{align*}
+\normalsize
 \allowdisplaybreaks[0]
 \end{proof}
 
