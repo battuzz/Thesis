@@ -1,0 +1,53 @@
+% Horizon penetrating coordinates (vs. Schwarzschild coordinates)
+% for a black hole spacetime, with excision
+% Author: Jonah Miller
+\documentclass[tikz,border=0pt]{standalone}
+\usepackage{tikz}
+\usepackage{pgf}
+\usetikzlibrary{arrows}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.markings}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+
+%\tikzset{>={Latex[length=3mm]}}
+
+\begin{document}
+\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, node distance=3.5cm, semithick]
+\tikzstyle{every state} = [draw=black, text=black, minimum size=1.5cm, thick, fill=blue!10]
+
+\node[state] (A) {\small Facebook\normalsize};
+\node[state,initial] (B)[below of=A] {Lezione 1};
+\node[state] (C)[right of=B] {Lezione 2};
+\node[state, fill=gray!20] (D)[right of=C] {Lezione 3};
+\node[state, fill=gray!20] (E)[above of=D] {Esame};
+\node[state, fill=gray!20] (F)[below of=C] {Pub};
+\node[state, fill=gray!20, accepting] (G)[above of=C] {Dormi};
+
+\draw (A) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-1};
+\draw (B) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-2};
+\draw (C) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-2};
+\draw (D) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=-2};
+\draw (E) node[text=red, xshift=0cm, yshift=1cm)] {r=+10};
+\draw (F) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=+1};
+\draw (G) node[text=red, xshift=1cm, yshift=-0.7cm)] {r=0};
+
+
+\path (A) edge[thick, bend left] node[right]{} (B)
+			edge[thick, red, loop above] node[xshift=30pt,yshift=-12pt]{Facebook}	(A)
+	(B) edge[thick, red, bend left] node[left]{Facebook} (A)
+		edge[thick] node[above]{} (C)
+	(C) edge[dashed] node[left]{} (G)
+		edge[dashed] node[above]{} (D)	
+	(D) edge[dashed] node[below,right]{} (F)
+		edge[dashed] node[right]{} (E)
+	(E) edge[dashed, bend right] node[above]{} (G)
+	(F) edge[dashed, bend left] node[left]{} (B)
+		edge[dashed, bend left] node[left]{} (C)
+		edge[dashed, bend right] node[right=7pt]{} (D) 
+	;
+
+\end{tikzpicture}
+\end{document}
