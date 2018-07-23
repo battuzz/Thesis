@@ -255,7 +255,7 @@ For each step, the agent performs an action and receives an observation
 \begin{frame}{Example: Mountain Car}
 \centering 
 
-  \animategraphics[autoplay,loop,width=0.9\linewidth]{30}{pictures/mountain_car_animation3}{}{}
+  \animategraphics[autoplay,loop,width=0.9\linewidth]{20}{pictures/mountain_car_animation3}{}{}
 \end{frame}
 
 
@@ -321,7 +321,7 @@ A policy $\pi_{\vtheta}$ is a function that maps states to actions
 \begin{block}{Performance}
 The performance $J(\vtheta)$ of a policy is the discounted sum of rewards obtained by following $\pi_{\vtheta}$
 \[
-J(\vtheta) = \sum_{k=0}^T \gamma^k r(s_k, a_k)
+J(\vtheta) = \mathbb{E}_{a_t \sim \pi_{\vtheta}}\left[ \sum_{k=0}^T \gamma^k r(s_k, a_k) \right]
 \]
 \end{block}
 
@@ -335,27 +335,10 @@ The optimal policy can be found by gradient ascent on policy parameters:
 \end{frame}
 
 
+
 \begin{frame}{Gaussian policies}
-
-\begin{table}
-\begin{tabular}[t]{m{0.4\textwidth}  m{0.6\textwidth}}
-
-\includegraphics[width=0.4\textwidth]{pictures/gauss.png} &
-\begin{minipage}{0.5\textwidth}\Large
-\begin{align*}
-s = [x; \dot{x}] \\ \vtheta = [\vv; w]
-\end{align*}
-\end{minipage}
- \\
-\includegraphics[width=0.4\textwidth]{pictures/mountain_car} &
- \begin{minipage}{0.5\textwidth}\Large \begin{equation*}
-\pi(a|s) = \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}\left(\frac{a - \vv\phi(s)}{\sigma}\right)^2}
-\end{equation*}
-\end{minipage}
-
-\end{tabular}
-\end{table}
-
+\centering
+\includegraphics[width=\textwidth]{pictures/image_action}
 \end{frame}
 
 
@@ -364,12 +347,12 @@ s = [x; \dot{x}] \\ \vtheta = [\vv; w]
 \begin{frame}{Safe Reinforcement Learning}
 \begin{figure}
 \begin{subfigure}[t]{0.495\textwidth}
-\includegraphics[width=\textwidth]{pictures/safe_learning.png}
+\includegraphics[width=\textwidth]{pictures/safe_unsafe}
 \caption{Ok}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{0.495\textwidth}
-\includegraphics[width=\textwidth]{pictures/unsafe_learning.png}
+\includegraphics[width=\textwidth]{pictures/safe_unsafe2}
 \caption{Not ok}
 \end{subfigure}
 \end{figure}
@@ -384,10 +367,11 @@ Given a reference $\underline{J}$ and a confidence level $\delta$, a RL algorith
 \end{block}
 
 \vfill
-
+\begin{figure}
 \centering
-\includegraphics[width=0.48\textwidth]{pictures/safe_explained}
-
+\includegraphics[width=0.74\textwidth]{pictures/image_improvement}
+\caption{Example of monotonic improvements}
+\end{figure}
 
 %For instance, monotonic improvement can be defined by a sequence of policies $\pi^0, \pi^1, \ldots, \pi^t$ where $J(\pi^t) \leq J(\pi^{t-1})$ with probability at most $\delta$ for every $t$.
 
@@ -423,7 +407,7 @@ Given a reference $\underline{J}$ and a confidence level $\delta$, a RL algorith
 
 \begin{frame}
 \frametitle{State of the art in Safe Reinforcement Learning}
-We will mainly refer to the results on Adaptive Step Size from~\cite{adaptive_step}
+We will mainly refer to the results on Adaptive Step Size from Pirotta et al.
 
 \begin{itemize}
 	\item Assuming a policy gradient method with Gaussian-parameterized policies $\pi_{\vtheta}$, an update rule of the form $\vtheta \gets \vtheta + \alpha\gradj$ and \textbf{fixed variance} $\sigma = e^w = const$:
@@ -454,17 +438,20 @@ J(\vtheta') - J(\vtheta) \geq \frac{1}{2}\alpha^* \norm[2]{\gradj}^2.
 
 The results seen so far suffer from the following problems:
 \begin{itemize}
+
 \item They target only \textbf{monotonic improvements}
 \begin{itemize}
 \item This covers only specific user needs.
 \end{itemize}
-\item They do not consider an \textbf{adaptive variance}
-\begin{itemize}
-\item The exploration factor remains constant and highly depends on the domain.
-\end{itemize}
+
 \item They are \textbf{overly conservative}
 \begin{itemize}
 \item Resulting in a very slow convergence speed.
+\end{itemize}
+
+\item They do not consider an \textbf{adaptive variance}
+\begin{itemize}
+\item The exploration factor remains constant and highly depends on the domain.
 \end{itemize}
 
 \end{itemize}
@@ -482,7 +469,7 @@ The results seen so far suffer from the following problems:
 \frametitle{Exploration in Reinforcement Learning}
 \centering
 %\includegraphics[width=0.7\textwidth]{pictures/mdp_policy2}
-\animategraphics[autoplay,loop,width=0.9\linewidth]{24}{pictures/mountain_car_animation4}{}{}
+\animategraphics[autoplay,loop,width=0.9\linewidth]{20}{pictures/mountain_car_animation4}{}{}
 \end{frame}
 
 
@@ -539,7 +526,7 @@ Exploration is intended as performing actions that are \textbf{different} than t
 We extended the performance improvement bounds to include an adaptive exploration factor:
 
 \[
-J(\vv, w') - J(\vv, w) \geq \beta \nabla_w J(\vv',w)^2 - d \beta^2 \nabla_w J(\vv',w)^2
+J(\vv, w') - J(\vv, w) \geq \textcolor{red}{\beta} \nabla_w J(\vv',w)^2 - d \textcolor{red}{\beta^2} \nabla_w J(\vv',w)^2
 \]
 that is maximized by:
 \[
@@ -561,7 +548,7 @@ J(\vv, w') - J(\vv, w) \geq \frac{\nabla_w J(\vv',w)^2}{4d}
 
 \begin{frame}{Contributions (1)}
 \begin{tightcenter}
-\includegraphics[width=0.4\textwidth]{pictures/newgradient}
+\includegraphics[width=0.9\textwidth]{pictures/greedy_update}
 \end{tightcenter}
 
 We adapted the results by employing a new gradient direction: 
@@ -581,7 +568,7 @@ We employed the budget trick to allow for a customizable implementation of this 
 \vfill
 
 \centering
-\includegraphics[width=0.6\textwidth]{pictures/budget_image}
+\includegraphics[width=\textwidth]{pictures/budget_explained}
 \end{frame}
 
 
@@ -620,20 +607,20 @@ The second contribution was to introduce a new framework that goes beyond the si
 \centering
 \textbf{Type-I}
 
-\includegraphics[width=\textwidth]{pictures/plot_safe_1.png}
+\includegraphics[width=\textwidth]{pictures/safe_unsafe3}
 
 \column{0.5\textwidth}
 \centering
 \textbf{Type-II}
 
-\includegraphics[width=\textwidth]{pictures/plot_safe_2.png}
+\includegraphics[width=\textwidth]{pictures/safe_unsafe4}
 
 \end{columns}
 \end{frame}
 
 
 \begin{frame}{Contributions (2)}
-In these classes we have identified several variants:
+Among these classes we have identified several variants:
 \renewcommand{\arraystretch}{1.6}
 
 
@@ -725,20 +712,24 @@ We devised a new general algorithm that can be customized to specific user needs
 \begin{frame}
 \frametitle{Results - Linear Quadratic Gaussian controller}
 
-\vspace{-0.3cm}
+\vspace{-0.6cm}
 \begin{figure}[p]
-\begin{subfigure}[p]{0.5\textwidth}
-\includegraphics[width=1.2\textwidth]{pictures/newplots/newplot1}
+\begin{subfigure}[p]{0.54\textwidth}
+\includegraphics[width=\textwidth]{pictures/newplots/newplot1}
+\caption{Performance of MI, LB-I and LB-II variants}
 \end{subfigure}
 \hfill
 \begin{subfigure}[p]{0.45\textwidth}
 \begin{subfigure}[t]{\textwidth}
-\includegraphics[width=1.05\textwidth]{pictures/newplots/newplot2}
+\centering
+\includegraphics[width=0.85\textwidth]{pictures/newplots/newplot2}
+\caption{Evolution of variance $\sigma$}
 \end{subfigure}
 \vfill
 \begin{subfigure}[b]{\textwidth}
-\vspace{-0.3cm}
-\includegraphics[width=1.05\textwidth]{pictures/newplots/newplot3}
+\centering
+\includegraphics[width=0.85\textwidth]{pictures/newplots/newplot3}
+\caption{Evolution of the mean $\vv$}
 \end{subfigure}
 \end{subfigure}
 
@@ -750,9 +741,9 @@ We devised a new general algorithm that can be customized to specific user needs
 \begin{frame}{Conclusions}
 In this work we have introduced:
 \begin{itemize}
-\item A new general framework for safe reinforcement learning
-\item An adaptive way to explore the environment
-\item A general algorithm that can be customized to the user needs
+\item An \textbf{adaptive way to explore} the environment
+\item A \textbf{new general framework} for safe reinforcement learning
+\item A \textbf{general algorithm} that can be customized to the user needs
 \end{itemize}
 \vfill
 Further works can focus on:
@@ -764,15 +755,15 @@ Further works can focus on:
 
 \end{frame}
 
-\begin{frame}
-\frametitle{Conclusions}
-\LARGE So many questions... \normalsize
-
-\vfill
-
-\centering
-\animategraphics[autoplay,loop,controls,width=0.5\linewidth]{30}{pictures/half_cheetah/half_cheetah-}{0}{200}
-\end{frame}
+%\begin{frame}
+%\frametitle{Conclusions}
+%\LARGE So many questions... \normalsize
+%
+%\vfill
+%
+%\centering
+%\animategraphics[autoplay,loop,controls,width=0.5\linewidth]{30}{pictures/half_cheetah/half_cheetah-}{0}{200}
+%\end{frame}
 
 \begin{frame}{Conclusions}
 \centering
