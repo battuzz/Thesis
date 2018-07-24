@@ -21,9 +21,9 @@
 \begin{document}
 \begin{tikzpicture}[xscale=2]
 
-\draw[->,black,dashed] (0,0) -- (4,1) node[midway,above left]{$\boldsymbol{v}$-update} ;%node[right,black]{$J(\boldsymbol{\theta}')$};
-\draw[->, thick, blue] (0,0) -> (2,-0.7) node[midway,below left]{$w$-update};
-\draw[->, thick, blue] (2,-0.7) -- (4,2) node[midway,xshift=15pt,yshift=-12pt]{$\boldsymbol{v}$-update};% node[right,black]{$J(\boldsymbol{\theta}')$};
+\draw[->,black,dashed] (0,0) -- (4,1) node[midway,above left]{\begin{minipage}{2cm}\centering na\"ive \\ mean update\end{minipage}} ;%node[right,black]{$J(\boldsymbol{\theta}')$};
+\draw[->, thick, blue] (0,0) -> (2,-0.7) node[midway,below left]{variance-update};
+\draw[->, thick, blue] (2,-0.7) -- (4,2) node[midway,xshift=15pt,yshift=-12pt]{mean-update};% node[right,black]{$J(\boldsymbol{\theta}')$};
 
 \draw[->] (0,0) -- (5,0) node[above right]{$t$};
 \draw[->] (0,0) -- (0,2.2) node[above left]{$J(\boldsymbol{\theta})$};

@@ -1,0 +1,44 @@
+% Horizon penetrating coordinates (vs. Schwarzschild coordinates)
+% for a black hole spacetime, with excision
+% Author: Jonah Miller
+\documentclass[tikz,border=0pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{decorations.markings}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{scalefnt}
+
+\usepackage[utf8]{inputenc}
+
+\usepgfplotslibrary{fillbetween}
+\usepackage{lmodern}
+
+
+
+%\tikzset{>={Latex[length=3mm]}}
+
+\tikzstyle{mybox} = [draw=black,
+    rectangle, inner sep=10pt, inner ysep=10pt]
+\tikzstyle{fancytitle} =[fill=blue!30, text=black]
+
+\pgfplotsset{soldot/.style={color=blue,only marks,mark=*}} \pgfplotsset{holdot/.style={color=blue,fill=white,only marks,mark=*}}
+
+
+\begin{document}
+\begin{tikzpicture}[xscale=1]
+
+\draw[->,thick] (0,0) -- (0,4) node[left]{$J(\boldsymbol{\theta})$};
+\draw[->,thick] (0,0) -- (6,0) node[above left]{t};
+
+\pgfmathsetseed{5}
+\draw[thick] plot [domain=0:5.6,smooth,samples=60] (\x,{0.07+ 1*sqrt(2*\x)+0.1*rand });
+
+\pgfmathsetseed{3}
+\draw[thick, dashed, red] plot [domain=0:5.6,smooth,samples=60] (\x,{ 1*sqrt(2*\x) }) node[right]{$\underline{J}$};
+
+
+\end{tikzpicture}
+\end{document}

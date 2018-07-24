@@ -226,12 +226,12 @@ July 25, 2018
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\AtBeginSection[] {
-\begin{frame}
-\frametitle{Contents}
-\tableofcontents[currentsection]
-\end{frame}
-}
+%\AtBeginSection[] {
+%\begin{frame}
+%\frametitle{Contents}
+%\tableofcontents[currentsection]
+%\end{frame}
+%}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Reinforcement Learning}
 
@@ -259,18 +259,18 @@ For each step, the agent performs an action and receives an observation
 \end{frame}
 
 
-\begin{frame}
-\frametitle{Example: Mountain Car}
-\begin{figure}[t]
-\begin{subfigure}{0.49\textwidth}
-\includegraphics[width=\textwidth]{pictures/mc2}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.49\textwidth}
-\includegraphics[width=\textwidth]{pictures/mc3}
-\end{subfigure}
-\end{figure}
-\end{frame}
+%\begin{frame}
+%\frametitle{Example: Mountain Car}
+%\begin{figure}[t]
+%\begin{subfigure}{0.49\textwidth}
+%\includegraphics[width=\textwidth]{pictures/mc2}
+%\end{subfigure}
+%\hfill
+%\begin{subfigure}{0.49\textwidth}
+%\includegraphics[width=\textwidth]{pictures/mc3}
+%\end{subfigure}
+%\end{figure}
+%\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -348,12 +348,12 @@ The optimal policy can be found by gradient ascent on policy parameters:
 \begin{figure}
 \begin{subfigure}[t]{0.495\textwidth}
 \includegraphics[width=\textwidth]{pictures/safe_unsafe}
-\caption{Ok}
+\caption{Ideal behavior}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{0.495\textwidth}
 \includegraphics[width=\textwidth]{pictures/safe_unsafe2}
-\caption{Not ok}
+\caption{More realistic scenario}
 \end{subfigure}
 \end{figure}
 \end{frame}
@@ -407,7 +407,7 @@ Given a reference $\underline{J}$ and a confidence level $\delta$, a RL algorith
 
 \begin{frame}
 \frametitle{State of the art in Safe Reinforcement Learning}
-We will mainly refer to the results on Adaptive Step Size from Pirotta et al.
+We will mainly refer on SPG algorithm from (Adaptive Step Size in Policy Gradient, Pirotta et al., 2013).
 
 \begin{itemize}
 	\item Assuming a policy gradient method with Gaussian-parameterized policies $\pi_{\vtheta}$, an update rule of the form $\vtheta \gets \vtheta + \alpha\gradj$ and \textbf{fixed variance} $\sigma = e^w = const$:
@@ -473,18 +473,18 @@ The results seen so far suffer from the following problems:
 \end{frame}
 
 
-\begin{frame}
-\frametitle{Exploration in Reinforcement Learning}
-Exploration is intended as performing actions that are \textbf{different} than the ones the agent is used to.
-
-\begin{itemize}
-\addtolength{\itemsep}{.2cm}
-\item Obtain more informations about the environment
-\item Find new solutions (possibly better)
-\item Escape from local maxima
-\end{itemize}
-
-\end{frame}
+%\begin{frame}
+%\frametitle{Exploration in Reinforcement Learning}
+%Exploration is intended as performing actions that are \textbf{different} than the ones the agent is used to.
+%
+%\begin{itemize}
+%\addtolength{\itemsep}{.2cm}
+%\item Obtain more informations about the environment
+%\item Find new solutions (possibly better)
+%\item Escape from local maxima
+%\end{itemize}
+%
+%\end{frame}
 
 
 
@@ -600,41 +600,91 @@ The second contribution was to introduce a new framework that goes beyond the si
 
 \end{frame}
 
+%\begin{frame}
+%\frametitle{Contributions (2)}
+%\begin{columns}[T]
+%\column{0.5\textwidth}
+%\centering
+%\textbf{Type-I}
+%\begin{figure}
+%\begin{subfigure}{\textwidth}
+%\centering
+%\includegraphics[width=0.75\textwidth]{pictures/safe_unsafe5}
+%\caption{Monotonic improvement}
+%\end{subfigure}
+%
+%\begin{subfigure}{\textwidth}
+%\centering
+%\includegraphics[width=0.75\textwidth]{pictures/safe_unsafe3}
+%\caption{Lower-bounded I (LB-I)}
+%\end{subfigure}
+%\end{figure}
+%
+%\column{0.5\textwidth}
+%\centering
+%\textbf{Type-II}
+%%\begin{subfigure}{\textwidth}
+%%\includegraphics[width=\textwidth]{pictures/safe_unsafe4}
+%%\caption{Lower-bounded II (LB-II)}
+%%\end{subfigure}
+%\end{columns}
+%\end{frame}
+
+
+
 \begin{frame}
 \frametitle{Contributions (2)}
-\begin{columns}[T]
-\column{0.5\textwidth}
+
+\begin{figure}[p]
+\begin{subfigure}[t]{0.49\textwidth}
 \centering
 \textbf{Type-I}
 
-\includegraphics[width=\textwidth]{pictures/safe_unsafe3}
+\begin{subfigure}{\textwidth}
+\centering
+\includegraphics[width=0.75\textwidth]{pictures/safe_unsafe5}
+\caption{Monotonic improvement (MI)}
+\end{subfigure}
+\vfill
+\begin{subfigure}{\textwidth}
+\centering
+\includegraphics[width=0.75\textwidth]{pictures/safe_unsafe3}
+\caption{Lower-bounded I (LB-I)}
+\end{subfigure}
 
-\column{0.5\textwidth}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.49\textwidth}
 \centering
 \textbf{Type-II}
 
+\begin{subfigure}[p]{\textwidth}
 \includegraphics[width=\textwidth]{pictures/safe_unsafe4}
-
-\end{columns}
-\end{frame}
-
-
-\begin{frame}{Contributions (2)}
-Among these classes we have identified several variants:
-\renewcommand{\arraystretch}{1.6}
-
-
-
-\begin{tabular}[t]{R{0.1\textwidth} m{0.85\textwidth}}
-\textbf{MI} & Monotonic Improvement with type-I safety \\
-\textbf{LB-I} & Lower bounds to the initial policy with type-I safety \\
-\textbf{LB-II} & Lower bounds to the initial policy with type-II safety \\
-\multicolumn{2}{c}{--- Variants with an additional target policy evaluation ---}\\
-\textbf{LV} & A low variance (\eg prototype) policy is tested \\
-\textbf{ZV} & The deterministic policy is tested
-\end{tabular}
+\caption{Lower-bounded II (LB-II)}
+\end{subfigure}
+\end{subfigure}
+\end{figure}
 
 \end{frame}
+
+
+
+%\begin{frame}{Contributions (2)}
+%Among these classes we have identified several variants:
+%\renewcommand{\arraystretch}{1.6}
+%
+%
+%
+%\begin{tabular}[t]{R{0.1\textwidth} m{0.85\textwidth}}
+%\textbf{MI} & Monotonic Improvement with type-I safety \\
+%\textbf{LB-I} & Lower bounds to the initial policy with type-I safety \\
+%\textbf{LB-II} & Lower bounds to the initial policy with type-II safety \\
+%\multicolumn{2}{c}{--- Variants with an additional target policy evaluation ---}\\
+%\textbf{LV} & A low variance (\eg prototype) policy is tested \\
+%\textbf{ZV} & The deterministic policy is tested
+%\end{tabular}
+%
+%\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -676,11 +726,11 @@ We devised a new general algorithm that can be customized to specific user needs
 \centering
 \begin{figure}
 \begin{subfigure}[t]{0.49\textwidth}
-\includegraphics[width=\textwidth]{pictures/plot_MC3}
+\includegraphics[width=\textwidth]{pictures/plot_mc1}
 \caption{Evolution of the performance}
 \end{subfigure}
 \begin{subfigure}[t]{0.49\textwidth}
-\includegraphics[width=\textwidth]{pictures/plot_MC_sigma3}
+\includegraphics[width=\textwidth]{pictures/plot_mc2}
 \caption{Evolution of the exploration parameter}
 \end{subfigure}
 \end{figure}
